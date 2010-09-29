@@ -14,14 +14,16 @@ Item {
     property string expectFailMsg
 
     function fail(msg) {
+        if (!msg)
+            msg = "";
         if (expectingFail) {
             if (expectFailMsg)
-                print("EXPECT : " + currentTestCase + " " + expectFailMsg + " " + msg)
+                print("XFAIL  : " + currentTestCase + " " + expectFailMsg + " " + msg)
             else
-                print("EXPECT : " + currentTestCase + " " + msg)
+                print("XFAIL  : " + currentTestCase + " " + msg)
             throw new Error("QtTest::expect_fail")
         } else {
-            print("FAIL   : " + currentTestCase + " " + msg)
+            print("FAIL!  : " + currentTestCase + " " + msg)
             throw new Error("QtTest::fail")
         }
     }
@@ -68,8 +70,13 @@ Item {
             expectingFail = false
             try {
                 testCase[prop]()
-                ++numPassed
-                print("PASS   : " + currentTestCase)
+                if (expectingFail) {
+                    ++numFailed
+                    print("XPASS  : " + currentTestCase)
+                } else {
+                    ++numPassed
+                    print("PASS   : " + currentTestCase)
+                }
             } catch (e) {
                 if (e.message == "QtTest::fail") {
                     ++numFailed
