@@ -55,10 +55,42 @@ Item {
         expectFailMsg = msg
     }
 
-    function run() {
+    property variant testCaseResult
+
+    function runInternal(prop, dataDriven, arg, tag) {
         var prefix;
         if (name)
             prefix = name + "::"
+        if (dataDriven && tag)
+            currentTestCase = prefix + prop + "() [" + tag + "]"
+        else
+            currentTestCase = prefix + prop + "()"
+        expectingFail = false
+        var success = true
+        try {
+            testCaseResult = testCase[prop](arg)
+            if (expectingFail) {
+                ++numFailed
+                success = false
+                print("XPASS  : " + currentTestCase)
+            } else if (!dataDriven) {
+                print("PASS   : " + currentTestCase)
+            }
+        } catch (e) {
+            testCaseResult = []
+            if (e.message == "QtTest::fail") {
+                ++numFailed
+                success = false
+            } else if (e.message == "QtTest::skip") {
+                ++numSkipped
+            } else if (e.message == "QtTest::expect_fail") {
+                ++numFailed
+            }
+        }
+        return success
+    }
+
+    function run() {
         var success = true
         numPassed = 0
         numFailed = 0
@@ -66,26 +98,37 @@ Item {
         for (var prop in testCase) {
             if (prop.indexOf("test_") != 0)
                 continue
-            currentTestCase = prefix + prop + "()"
-            expectingFail = false
-            try {
-                testCase[prop]()
-                if (expectingFail) {
-                    ++numFailed
-                    print("XPASS  : " + currentTestCase)
+            var tail = prop.lastIndexOf("_data");
+            if (tail != -1 && tail == (prop.length - 5))
+                continue
+            var datafunc = prop + "_data"
+            if (datafunc in testCase) {
+                if (runInternal(datafunc, true)) {
+                    var table = testCaseResult
+                    var successThis = true
+                    for (var index in table) {
+                        var row = table[index]
+                        if (!runInternal(prop, true, row, row.tag))
+                            successThis = false
+                    }
+                    if (successThis) {
+                        var prefix;
+                        if (name)
+                            prefix = name + "::"
+                        currentTestCase = prefix + prop + "()"
+                        print("PASS   : " + currentTestCase)
+                        ++numPassed
+                    } else {
+                        success = false
+                    }
                 } else {
-                    ++numPassed
-                    print("PASS   : " + currentTestCase)
-                }
-            } catch (e) {
-                if (e.message == "QtTest::fail") {
-                    ++numFailed
                     success = false
-                } else if (e.message == "QtTest::skip") {
-                    ++numSkipped
-                } else if (e.message == "QtTest::expect_fail") {
-                    ++numFailed
                 }
+            } else {
+                if (runInternal(prop, false))
+                    ++numPassed
+                else
+                    success = false
             }
         }
         currentTestCase = ""
