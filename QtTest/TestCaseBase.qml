@@ -106,11 +106,15 @@ Item {
                 if (runInternal(datafunc, true)) {
                     var table = testCaseResult
                     var successThis = true
+                    var haveData = false
                     for (var index in table) {
+                        haveData = true
                         var row = table[index]
                         if (!runInternal(prop, true, row, row.tag))
                             successThis = false
                     }
+                    if (!haveData)
+                        print("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
                     if (successThis) {
                         var prefix;
                         if (name)
