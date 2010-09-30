@@ -41,8 +41,14 @@ Item {
     }
 
     function compare(actual, expected, msg) {
-        if (actual != expected)
-            fail2(msg, "actual: " + actual + ", expected: " + expected)
+        if (typeof actual == "number" && typeof expected == "number") {
+            // Use a fuzzy compare if the two values are floats
+            if (Math.abs(actual - expected) <= 0.00001)
+                return;
+        } else if (actual == expected) {
+            return;
+        }
+        fail2(msg, "actual: " + actual + ", expected: " + expected)
     }
 
     function skip(msg) {
