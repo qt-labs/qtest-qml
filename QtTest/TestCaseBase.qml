@@ -3,15 +3,27 @@ import Qt 4.7
 Item {
     id: testCase
     visible: false
-    property string name
-    property variant tests: []
 
+    // Name of the test case to prefix the function name in messages.
+    property string name
+
+    // Set to true to start the test running.
+    property bool when: true
+
+    // Set to true once the test has completed.
+    property bool completed: false
+
+    // Set to true when the test is running but not yet complete.
+    property bool running: false
+
+    // Internal private state
     property string currentTestCase
     property int numPassed
     property int numFailed
     property int numSkipped
     property bool expectingFail
     property string expectFailMsg
+    property bool prevWhen: true
 
     function fail(msg) {
         if (!msg)
@@ -101,6 +113,7 @@ Item {
         numPassed = 0
         numFailed = 0
         numSkipped = 0
+        running = true
         for (var prop in testCase) {
             if (prop.indexOf("test_") != 0)
                 continue
@@ -142,6 +155,16 @@ Item {
             }
         }
         currentTestCase = ""
-        return success;
+        running = false
+        completed = true
+        return success
+    }
+
+    onWhenChanged: {
+        if (when != prevWhen) {
+            prevWhen = when
+            if (when && !completed && !running)
+                run()
+        }
     }
 }
