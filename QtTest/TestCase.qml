@@ -1,4 +1,5 @@
 import Qt 4.7
+import "testlogger.js" as TestLogger
 
 Item {
     id: testCase
@@ -18,9 +19,6 @@ Item {
 
     // Internal private state
     property string currentTestCase
-    property int numPassed
-    property int numFailed
-    property int numSkipped
     property bool expectingFail
     property string expectFailMsg
     property bool prevWhen: true
@@ -29,13 +27,10 @@ Item {
         if (!msg)
             msg = "";
         if (expectingFail) {
-            if (expectFailMsg)
-                print("XFAIL  : " + currentTestCase + " " + expectFailMsg + " " + msg)
-            else
-                print("XFAIL  : " + currentTestCase + " " + msg)
+            TestLogger.log_expect_fail(currentTestCase, expectFailMsg, msg)
             throw new Error("QtTest::expect_fail")
         } else {
-            print("FAIL!  : " + currentTestCase + " " + msg)
+            TestLogger.log_fail(currentTestCase, msg)
             throw new Error("QtTest::fail")
         }
     }
@@ -64,7 +59,7 @@ Item {
     }
 
     function skip(msg) {
-        print("SKIP   : " + currentTestCase + " " + msg)
+        TestLogger.log_skip(currentTestCase, msg)
         throw new Error("QtTest::skip")
     }
 
@@ -88,31 +83,21 @@ Item {
         try {
             testCaseResult = testCase[prop](arg)
             if (expectingFail) {
-                ++numFailed
                 success = false
-                print("XPASS  : " + currentTestCase)
+                TestLogger.log_expect_fail_pass(currentTestCase)
             } else if (!dataDriven) {
-                print("PASS   : " + currentTestCase)
+                TestLogger.log_pass(currentTestCase)
             }
         } catch (e) {
             testCaseResult = []
-            if (e.message == "QtTest::fail") {
-                ++numFailed
+            if (e.message == "QtTest::fail")
                 success = false
-            } else if (e.message == "QtTest::skip") {
-                ++numSkipped
-            } else if (e.message == "QtTest::expect_fail") {
-                ++numFailed
-            }
         }
         return success
     }
 
     function run() {
         var success = true
-        numPassed = 0
-        numFailed = 0
-        numSkipped = 0
         running = true
         for (var prop in testCase) {
             if (prop.indexOf("test_") != 0)
@@ -133,14 +118,13 @@ Item {
                             successThis = false
                     }
                     if (!haveData)
-                        print("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
+                        console.log("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
                     if (successThis) {
                         var prefix;
                         if (name)
                             prefix = name + "::"
                         currentTestCase = prefix + prop + "()"
-                        print("PASS   : " + currentTestCase)
-                        ++numPassed
+                        TestLogger.log_pass(currentTestCase)
                     } else {
                         success = false
                     }
@@ -148,9 +132,7 @@ Item {
                     success = false
                 }
             } else {
-                if (runInternal(prop, false))
-                    ++numPassed
-                else
+                if (!runInternal(prop, false))
                     success = false
             }
         }
@@ -171,12 +153,10 @@ Item {
     Component.onCompleted: {
         prevWhen = when
         if (when && !completed && !running) {
-            print("********* Start testing of " + name + " *********")
+            console.log("********* Start testing of " + name + " *********")
             var success = run()
-            print("Totals: " + numPassed + " passed, " +
-                               numFailed + " failed, " +
-                               numSkipped + " skipped");
-            print("********* Finished testing of " + name + " *********")
+            TestLogger.log_print_totals()
+            console.log("********* Finished testing of " + name + " *********")
             Qt.quit()       // XXX - how do we set the exit value?
         }
     }
