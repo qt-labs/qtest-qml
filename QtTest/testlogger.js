@@ -15,15 +15,13 @@ function log_init_results()
             numFailed: 0,
             numSkipped: 0,
             nextId: 0,
-            testCases: [],
-            completedTestCases: []
+            testCases: []
         }
     }
 }
 
 function log_fail(testcase, msg)
 {
-    log_init_results()
     if (!msg)
         msg = ""
     console.log("FAIL!  : " + testcase + " " + msg)
@@ -32,7 +30,6 @@ function log_fail(testcase, msg)
 
 function log_expect_fail(testcase, expectmsg, msg)
 {
-    log_init_results()
     if (!msg)
         msg = ""
     if (expectmsg)
@@ -44,14 +41,12 @@ function log_expect_fail(testcase, expectmsg, msg)
 
 function log_expect_fail_pass(testcase)
 {
-    log_init_results()
     console.log("XPASS  : " + testcase)
     ++Qt.testResults.numFailed
 }
 
 function log_skip(testcase, msg)
 {
-    log_init_results()
     if (!msg)
         msg = ""
     console.log("SKIP   : " + testcase + " " + msg)
@@ -60,20 +55,17 @@ function log_skip(testcase, msg)
 
 function log_pass(testcase)
 {
-    log_init_results()
     console.log("PASS   : " + testcase)
     ++Qt.testResults.numPassed
 }
 
 function log_message(msg)
 {
-    log_init_results()
     console.log(msg)
 }
 
 function log_print_totals()
 {
-    log_init_results()
     console.log("Totals: " + Qt.testResults.numPassed + " passed, " +
                              Qt.testResults.numFailed + " failed, " +
                              Qt.testResults.numSkipped + " skipped");
@@ -104,10 +96,8 @@ function log_start_test()
 function log_complete_test(testId)
 {
     var index = Qt.testResults.testCases.indexOf(testId)
-    if (index >= 0) {
+    if (index >= 0)
         Qt.testResults.testCases.splice(index, 1)
-        Qt.testResults.completedTestCases.push(testId)
-    }
     if (!Qt.testResults.testCases.length) {
         log_print_totals()
         if (Qt.testResults.suiteName)
