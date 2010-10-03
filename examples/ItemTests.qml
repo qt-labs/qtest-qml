@@ -16,8 +16,17 @@ Rectangle {
     TestCase {
         name: "ItemTests"
         when: area.pressed
+        id: test1
 
         function test_bar() {
+            verify(bar)
+        }
+    }
+
+    TestCase {
+        when: test1.completed
+
+        function test_bar2() {
             verify(bar)
         }
     }

@@ -22,6 +22,7 @@ Item {
     property bool expectingFail
     property string expectFailMsg
     property bool prevWhen: true
+    property int testId: -1
 
     function fail(msg) {
         if (!msg)
@@ -71,13 +72,9 @@ Item {
     property variant testCaseResult
 
     function runInternal(prop, dataDriven, arg, tag) {
-        var prefix;
-        if (name)
-            prefix = name + "::"
+        currentTestCase = TestLogger.log_prefixed_name(name, prop)
         if (dataDriven && tag)
-            currentTestCase = prefix + prop + "() [" + tag + "]"
-        else
-            currentTestCase = prefix + prop + "()"
+            currentTestCase += " [" + tag + "]"
         expectingFail = false
         var success = true
         try {
@@ -97,6 +94,7 @@ Item {
     }
 
     function run() {
+        TestLogger.log_start_test()
         var success = true
         running = true
         for (var prop in testCase) {
@@ -118,7 +116,7 @@ Item {
                             successThis = false
                     }
                     if (!haveData)
-                        console.log("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
+                        TestLogger.log_message("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
                     if (successThis) {
                         var prefix;
                         if (name)
@@ -139,6 +137,7 @@ Item {
         currentTestCase = ""
         running = false
         completed = true
+        TestLogger.log_complete_test(testId)
         return success
     }
 
@@ -151,13 +150,9 @@ Item {
     }
 
     Component.onCompleted: {
+        testId = TestLogger.log_register_test(name)
         prevWhen = when
-        if (when && !completed && !running) {
-            console.log("********* Start testing of " + name + " *********")
-            var success = run()
-            TestLogger.log_print_totals()
-            console.log("********* Finished testing of " + name + " *********")
-            Qt.quit()       // XXX - how do we set the exit value?
-        }
+        if (when && !completed && !running)
+            run()
     }
 }
