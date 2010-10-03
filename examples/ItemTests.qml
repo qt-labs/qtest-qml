@@ -30,4 +30,13 @@ Rectangle {
             verify(bar)
         }
     }
+
+    TestCase {
+        when: false
+        optional: true
+
+        function test_not_run() {
+            verify(false)
+        }
+    }
 }

@@ -17,6 +17,10 @@ Item {
     // Set to true when the test is running but not yet complete.
     property bool running: false
 
+    // Set to true if the test doesn't have to run (because some
+    // other test failed which this one depends on).
+    property bool optional: false
+
     // Internal private state
     property string currentTestCase
     property bool expectingFail
@@ -149,8 +153,19 @@ Item {
         }
     }
 
+    onOptionalChanged: {
+        if (!completed) {
+            if (optional)
+                TestLogger.log_optional_test(testId)
+            else
+                TestLogger.log_mandatory_test(testId)
+        }
+    }
+
     Component.onCompleted: {
         testId = TestLogger.log_register_test(name)
+        if (optional)
+            TestLogger.log_optional_test(testId)
         prevWhen = when
         if (when && !completed && !running)
             run()

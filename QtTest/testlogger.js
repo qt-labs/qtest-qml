@@ -81,6 +81,22 @@ function log_register_test(name)
     return testId
 }
 
+function log_optional_test(testId)
+{
+    log_init_results()
+    var index = Qt.testResults.testCases.indexOf(testId)
+    if (index >= 0)
+        Qt.testResults.testCases.splice(index, 1)
+}
+
+function log_mandatory_test(testId)
+{
+    log_init_results()
+    var index = Qt.testResults.testCases.indexOf(testId)
+    if (index == -1)
+        Qt.testResults.testCases.push(testId)
+}
+
 function log_start_test()
 {
     log_init_results()
