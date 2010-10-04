@@ -1,0 +1,140 @@
+
+Basic test cases
+================
+
+Test cases are written as JavaScript functions within a "TestCase" element:
+
+----------------------
+import Qt 4.7
+import QtTest 1.0
+
+TestCase {
+    name: "MathTests"
+
+    function test_math() {
+        compare(2 + 2, 4, "2 + 2 = 4")
+    }
+
+    function test_math_fail() {
+        compare(2 + 2, 5, "2 + 2 = 5")
+    }
+}
+----------------------
+
+Functions that start with "test_" are treated as test cases to be
+executed.  The "name" is used to prefix the functions in the output:
+
+********* Start testing of MathTests *********
+FAIL!  : MathTests::test_math_fail() 2 + 2 = 5: actual: 4, expected: 5
+PASS   : MathTests::test_math()
+Totals: 1 passed, 1 failed, 0 skipped
+********* Finished testing of MathTests *********
+
+Because of the way JavaScript properties work, the order in which the
+test functions are run is undefined.
+
+A number of helper functions are available to assist with writing tests:
+
+    fail(msg)
+        - Fail the current test and show "msg".
+        - Similar to QFAIL in C++
+
+    verify(cond, msg)
+        - Verify that "cond" is true, fail with "msg" if not.
+        - Similar to QVERIFY in C++
+
+    compare(actual, expected, msg)
+        - Compare "actual" with "expected", fail with "msg" if not.
+        - Similar to QCOMPARE in C++
+
+    skip(msg)
+        - Skip the current test and show "msg".
+        - Similar to QSKIP in C++
+
+    expectFail(msg)
+        - Mark the current test as expected to fail, with "msg" on failure.
+
+The "msg" parameters can be omitted if there is no particular message
+that should be displayed other than "FAIL" or "SKIP".
+
+Data-driven tests
+=================
+
+Table data can be provided to a test using a function name that ends
+with "_data":
+
+----------------------
+import Qt 4.7
+import QtTest 1.0
+
+TestCase {
+    name: "DataTests"
+
+    function test_table_data() {
+        return [
+            {tag: "2 + 2 = 4", a: 2, b: 2, answer: 4 },
+            {tag: "2 + 6 = 8", a: 2, b: 6, answer: 8 },
+        ]
+    }
+
+    function test_table(data) {
+        compare(data.a + data.b, data.answer)
+    }
+}
+----------------------
+
+The test framework will iterate over all of the rows in the table
+and pass each row to the test function.  As shown, the columns can be
+extracted for use in the test.  The "tag" column is special - it is printed
+by the test framework when a row fails, to help the reader identify which
+case failed amongst a set of otherwise passing tests.
+
+Asynchronous testing
+====================
+
+The "when" property can be used to cause a "TestCase" element to trigger
+only when a certain condition is true.  For example, the following example
+runs a test when the user presses the mouse button:
+
+----------------------
+import Qt 4.7
+import QtTest 1.0
+
+Rectangle {
+    id: foo
+    width: 640; height: 480
+    color: "cyan"
+
+    MouseArea {
+        id: area
+        anchors.fill: parent
+    }
+
+    property bool bar: true
+
+    TestCase {
+        name: "ItemTests"
+        when: area.pressed
+        id: test1
+
+        function test_bar() {
+            verify(bar)
+        }
+    }
+}
+----------------------
+
+Multiple "TestCase" elements can be supplied.  The test program will exit
+once they have all completed.  If a test case doesn't need to run (because
+a precondition has failed), then "optional" can be set to true:
+
+----------------------
+TestCase {
+    when: false
+    optional: true
+
+    function test_not_run() {
+        verify(false)
+    }
+}
+----------------------
