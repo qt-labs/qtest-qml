@@ -1,4 +1,46 @@
+/****************************************************************************
+**
+** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+** All rights reserved.
+** Contact: Nokia Corporation (qt-info@nokia.com)
+**
+** This file is part of the test suite of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** No Commercial Usage
+** This file contains pre-release code and may not be distributed.
+** You may use this file in accordance with the terms and conditions
+** contained in the Technology Preview License Agreement accompanying
+** this package.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain additional
+** rights.  These rights are described in the Nokia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** If you have questions regarding the use of this file, please contact
+** Nokia at qt-info@nokia.com.
+**
+**
+**
+**
+**
+**
+**
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
 import Qt 4.7
+import QtTest 1.0
 import "testlogger.js" as TestLogger
 
 Item {
@@ -28,6 +70,8 @@ Item {
     property bool prevWhen: true
     property int testId: -1
 
+    TestReport { id: reporter }
+
     function fail(msg) {
         if (!msg)
             msg = "";
@@ -56,9 +100,25 @@ Item {
         if (typeof actual == "number" && typeof expected == "number") {
             // Use a fuzzy compare if the two values are floats
             if (Math.abs(actual - expected) <= 0.00001)
-                return;
+                return
+        } else if (typeof actual == "object" && typeof expected == "object") {
+            // Does the expected value look like a vector3d?
+            if ("x" in expected && "y" in expected && "z" in expected) {
+                if (Math.abs(actual.x - expected.x) <= 0.00001 &&
+                        Math.abs(actual.y - expected.y) <= 0.00001 &&
+                        Math.abs(actual.z - expected.z) <= 0.00001)
+                    return
+                fail2(msg, "actual: Qt.vector3d(" +
+                           actual.x + ", " + actual.y + ", " + actual.z +
+                           "), expected: Qt.vector3d(" +
+                           expected.x + ", " + expected.y + ", " + expected.z +
+                           ")")
+                return
+            }
+            if (actual == expected)
+                return
         } else if (actual == expected) {
-            return;
+            return
         }
         fail2(msg, "actual: " + actual + ", expected: " + expected)
     }
@@ -91,22 +151,33 @@ Item {
             }
         } catch (e) {
             testCaseResult = []
-            if (e.message == "QtTest::fail")
+            if (e.message == "QtTest::fail") {
                 success = false
+            } else if (e.message.indexOf("QtTest::") != 0) {
+                // Test threw an unrecognized exception - fail.
+                TestLogger.log_fail(currentTestCase, e.message)
+                success = false
+            }
         }
         return success
     }
 
     function run() {
-        TestLogger.log_start_test()
+        TestLogger.log_start_test(reporter)
         var success = true
         running = true
+        var testList = []
         for (var prop in testCase) {
             if (prop.indexOf("test_") != 0)
                 continue
             var tail = prop.lastIndexOf("_data");
             if (tail != -1 && tail == (prop.length - 5))
                 continue
+            testList.push(prop)
+        }
+        testList.sort()
+        for (var index in testList) {
+            var prop = testList[index]
             var datafunc = prop + "_data"
             if (datafunc in testCase) {
                 if (runInternal(datafunc, true)) {
@@ -141,7 +212,7 @@ Item {
         currentTestCase = ""
         running = false
         completed = true
-        TestLogger.log_complete_test(testId)
+        TestLogger.log_complete_test(testId, reporter)
         return success
     }
 

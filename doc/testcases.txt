@@ -1,4 +1,12 @@
 
+Organization of QML/3D test cases
+=================================
+
+All of the test cases are in subdirectories under "tests/auto/qml3d".
+The "tst_qml3d" program searches for files in these subdirectories
+that match the pattern "tst_*.qml".  Other *.qml files may appear
+for auxillary QML components that are used by the test.
+
 Basic test cases
 ================
 
@@ -15,7 +23,7 @@ TestCase {
         compare(2 + 2, 4, "2 + 2 = 4")
     }
 
-    function test_math_fail() {
+    function test_fail() {
         compare(2 + 2, 5, "2 + 2 = 5")
     }
 }
@@ -25,13 +33,15 @@ Functions that start with "test_" are treated as test cases to be
 executed.  The "name" is used to prefix the functions in the output:
 
 ********* Start testing of MathTests *********
-FAIL!  : MathTests::test_math_fail() 2 + 2 = 5: actual: 4, expected: 5
+FAIL!  : MathTests::test_fail() 2 + 2 = 5: actual: 4, expected: 5
 PASS   : MathTests::test_math()
 Totals: 1 passed, 1 failed, 0 skipped
 ********* Finished testing of MathTests *********
 
 Because of the way JavaScript properties work, the order in which the
-test functions are run is undefined.
+test functions are found is unpredictable.  To assist with predictability,
+the test framework will sort the functions on ascending order of name.
+This can help when there are two tests that must be run in order.
 
 A number of helper functions are available to assist with writing tests:
 
