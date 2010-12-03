@@ -29,10 +29,12 @@ SOURCES += \
     qdeclarativetestreport.cpp
 HEADERS += \
     quicktestglobal.h \
-    qdeclarativetest.h \
-    qdeclarativetestreport.h
+    qdeclarativetest.h
+PRIVATE_HEADERS += \
+    qdeclarativetestreport_p.h
 
 PUBLIC_HEADERS += $$HEADERS
+HEADERS += $$PRIVATE_HEADERS
 
 DEFINES += QT_BUILD_TEST_QUICK_LIB
 

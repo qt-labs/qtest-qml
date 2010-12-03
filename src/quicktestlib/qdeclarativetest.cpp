@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include "qdeclarativetest.h"
-#include "qdeclarativetestreport.h"
+#include "qdeclarativetestreport_p.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeview.h>

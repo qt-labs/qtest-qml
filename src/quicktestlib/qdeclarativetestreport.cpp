@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include "qdeclarativetestreport.h"
+#include "qdeclarativetestreport_p.h"
 #include <QtGui/qtextdocument.h>
 #include <stdio.h>
 

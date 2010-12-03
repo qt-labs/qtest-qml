@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include <QtDeclarative/qdeclarativeextensionplugin.h>
-#include "qdeclarativetestreport.h"
+#include "qdeclarativetestreport_p.h"
 
 QT_BEGIN_NAMESPACE
 

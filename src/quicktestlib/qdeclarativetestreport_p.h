@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDECLARATIVETESTREPORT_H
-#define QDECLARATIVETESTREPORT_H
+#ifndef QDECLARATIVETESTREPORT_P_H
+#define QDECLARATIVETESTREPORT_P_H
 
 #include "quicktestglobal.h"
 #include <QtCore/qobject.h>
