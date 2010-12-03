@@ -25,9 +25,11 @@ symbian {
 }
 
 SOURCES += \
+    qdeclarativetest.cpp \
     qdeclarativetestreport.cpp
 HEADERS += \
     quicktestglobal.h \
+    qdeclarativetest.h \
     qdeclarativetestreport.h
 
 PUBLIC_HEADERS += $$HEADERS

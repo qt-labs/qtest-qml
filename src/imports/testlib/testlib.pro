@@ -13,8 +13,6 @@ symbian {
 
 QT += declarative
 
-INCLUDEPATH += $$PWD/../../quicktestlib
-
 SOURCES += main.cpp
 HEADERS +=
 
@@ -27,9 +25,4 @@ qdeclarativesources.path += $$[QT_INSTALL_IMPORTS]/QtTest
 target.path += $$[QT_INSTALL_IMPORTS]/QtTest
 INSTALLS += qdeclarativesources target
 
-LIBS += -L../../../lib -L../../../bin
-win32:CONFIG(debug, debug|release) {
-    LIBS += -lQtTestQuick$${QT_LIBINFIX}d
-} else {
-    LIBS += -lQtTestQuick$${QT_LIBINFIX}
-}
+include(../../quicktestlib/quicktestlib_dep.pri)

@@ -45,91 +45,91 @@
 
 QT_BEGIN_NAMESPACE
 
-static bool xmlOutput = false;
-static int passed = 0;
-static int failed = 0;
-static int skipped = 0;
-static FILE *stream = 0;
+bool qtest_quick_xmlOutput = false;
+int qtest_quick_passed = 0;
+int qtest_quick_failed = 0;
+int qtest_quick_skipped = 0;
+FILE *qtest_quick_stream = 0;
 
 void QDeclarativeTestReport::report(int pass, int fail, int skip)
 {
-    passed += pass;
-    failed += fail;
-    skipped += skip;
+    qtest_quick_passed += pass;
+    qtest_quick_failed += fail;
+    qtest_quick_skipped += skip;
 }
 
 void QDeclarativeTestReport::log_fail(const QString &testCase, const QString &message)
 {
-    if (!stream)
-        stream = stdout;
-    if (xmlOutput) {
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (qtest_quick_xmlOutput) {
         log_incident("fail", testCase, message);
     } else if (!message.isEmpty()) {
-        fprintf(stream, "FAIL!  : %s %s\n",
+        fprintf(qtest_quick_stream, "FAIL!  : %s %s\n",
                 testCase.toLatin1().constData(),
                 message.toLatin1().constData());
     } else {
-        fprintf(stream, "FAIL!  : %s\n", testCase.toLatin1().constData());
+        fprintf(qtest_quick_stream, "FAIL!  : %s\n", testCase.toLatin1().constData());
     }
 }
 
 void QDeclarativeTestReport::log_expect_fail
     (const QString &testCase, const QString &message)
 {
-    if (!stream)
-        stream = stdout;
-    if (xmlOutput) {
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (qtest_quick_xmlOutput) {
         log_incident("xfail", testCase, message);
     } else if (!message.isEmpty()) {
-        fprintf(stream, "XFAIL  : %s %s\n",
+        fprintf(qtest_quick_stream, "XFAIL  : %s %s\n",
                 testCase.toLatin1().constData(),
                 message.toLatin1().constData());
     } else {
-        fprintf(stream, "XFAIL  : %s\n", testCase.toLatin1().constData());
+        fprintf(qtest_quick_stream, "XFAIL  : %s\n", testCase.toLatin1().constData());
     }
 }
 
 void QDeclarativeTestReport::log_expect_fail_pass(const QString &testCase)
 {
-    if (!stream)
-        stream = stdout;
-    if (xmlOutput)
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (qtest_quick_xmlOutput)
         log_incident("xpass", testCase, QString());
     else
-        fprintf(stream, "XPASS  : %s\n", testCase.toLatin1().constData());
+        fprintf(qtest_quick_stream, "XPASS  : %s\n", testCase.toLatin1().constData());
 }
 
 void QDeclarativeTestReport::log_skip(const QString &testCase, const QString &message)
 {
-    if (!stream)
-        stream = stdout;
-    if (xmlOutput) {
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (qtest_quick_xmlOutput) {
         log_incident("skip", testCase, message);
     } else if (!message.isEmpty()) {
-        fprintf(stream, "SKIP   : %s %s\n",
+        fprintf(qtest_quick_stream, "SKIP   : %s %s\n",
                 testCase.toLatin1().constData(),
                 message.toLatin1().constData());
     } else {
-        fprintf(stream, "SKIP   : %s\n", testCase.toLatin1().constData());
+        fprintf(qtest_quick_stream, "SKIP   : %s\n", testCase.toLatin1().constData());
     }
 }
 
 void QDeclarativeTestReport::log_pass(const QString &testCase)
 {
-    if (!stream)
-        stream = stdout;
-    if (xmlOutput)
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (qtest_quick_xmlOutput)
         log_incident("pass", testCase, QString());
     else
-        fprintf(stream, "PASS   : %s\n", testCase.toLatin1().constData());
+        fprintf(qtest_quick_stream, "PASS   : %s\n", testCase.toLatin1().constData());
 }
 
 void QDeclarativeTestReport::log_message(const QString &message)
 {
-    if (!stream)
-        stream = stdout;
-    if (!xmlOutput)
-        fprintf(stream, "%s\n", message.toLatin1().constData());
+    if (!qtest_quick_stream)
+        qtest_quick_stream = stdout;
+    if (!qtest_quick_xmlOutput)
+        fprintf(qtest_quick_stream, "%s\n", message.toLatin1().constData());
 }
 
 void QDeclarativeTestReport::log_incident
@@ -146,23 +146,23 @@ void QDeclarativeTestReport::log_incident
             tag = tag.left(tag.length() - 1);
         name = name.left(tagIndex);
     }
-    fprintf(stream, "<TestFunction name=\"%s\">\n",
+    fprintf(qtest_quick_stream, "<TestFunction name=\"%s\">\n",
             Qt::escape(name).toLatin1().constData());
     if (message.isEmpty() && tag.isEmpty()) {
-        fprintf(stream, "<Incident type=\"%s\" file=\"\" line=\"0\" />\n", type);
+        fprintf(qtest_quick_stream, "<Incident type=\"%s\" file=\"\" line=\"0\" />\n", type);
     } else {
-        fprintf(stream, "<Incident type=\"%s\" file=\"\" line=\"0\">\n", type);
+        fprintf(qtest_quick_stream, "<Incident type=\"%s\" file=\"\" line=\"0\">\n", type);
         if (!tag.isEmpty()) {
-            fprintf(stream, "    <DataTag>%s</DataTag>\n",
+            fprintf(qtest_quick_stream, "    <DataTag>%s</DataTag>\n",
                     Qt::escape(tag).toLatin1().constData());
         }
         if (!message.isEmpty()) {
-            fprintf(stream, "    <Description>%s</Description>\n",
+            fprintf(qtest_quick_stream, "    <Description>%s</Description>\n",
                     Qt::escape(message).toLatin1().constData());
         }
-        fprintf(stream, "</Incident>\n");
+        fprintf(qtest_quick_stream, "</Incident>\n");
     }
-    fprintf(stream, "</TestFunction>\n");
+    fprintf(qtest_quick_stream, "</TestFunction>\n");
 }
 
 QT_END_NAMESPACE

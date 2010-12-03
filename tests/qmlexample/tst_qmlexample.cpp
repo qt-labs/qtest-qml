@@ -39,39 +39,6 @@
 **
 ****************************************************************************/
 
-#ifndef QDECLARATIVETESTREPORT_H
-#define QDECLARATIVETESTREPORT_H
+#include "qdeclarativetest.h"
 
-#include "quicktestglobal.h"
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
-#include <QtDeclarative/qdeclarative.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_TEST_QUICK_EXPORT QDeclarativeTestReport : public QObject
-{
-    Q_OBJECT
-public:
-    QDeclarativeTestReport(QObject *parent = 0) : QObject(parent) {}
-
-public Q_SLOTS:
-    void report(int pass, int fail, int skip);
-    void log_fail(const QString &testCase, const QString &message);
-    void log_expect_fail
-        (const QString &testCase, const QString &message);
-    void log_expect_fail_pass(const QString &testCase);
-    void log_skip(const QString &testCase, const QString &message);
-    void log_pass(const QString &testCase);
-    void log_message(const QString &message);
-
-private:
-    void log_incident(const char *type, const QString &testCase,
-                      const QString &message);
-};
-
-QML_DECLARE_TYPE(QDeclarativeTestReport)
-
-QT_END_NAMESPACE
-
-#endif
+QTEST_QUICK_MAIN(qmlexample)

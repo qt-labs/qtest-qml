@@ -39,38 +39,58 @@
 **
 ****************************************************************************/
 
-#ifndef QDECLARATIVETESTREPORT_H
-#define QDECLARATIVETESTREPORT_H
+#ifndef QDECLARATIVETEST_H
+#define QDECLARATIVETEST_H
 
 #include "quicktestglobal.h"
-#include <QtCore/qobject.h>
-#include <QtCore/qstring.h>
-#include <QtDeclarative/qdeclarative.h>
+#include <QtGui/qwidget.h>
+#ifdef QT_OPENGL_LIB
+#include <QtOpenGL/qgl.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 
-class Q_TEST_QUICK_EXPORT QDeclarativeTestReport : public QObject
-{
-    Q_OBJECT
-public:
-    QDeclarativeTestReport(QObject *parent = 0) : QObject(parent) {}
+typedef QWidget *(*qtest_create_viewport)();
 
-public Q_SLOTS:
-    void report(int pass, int fail, int skip);
-    void log_fail(const QString &testCase, const QString &message);
-    void log_expect_fail
-        (const QString &testCase, const QString &message);
-    void log_expect_fail_pass(const QString &testCase);
-    void log_skip(const QString &testCase, const QString &message);
-    void log_pass(const QString &testCase);
-    void log_message(const QString &message);
+Q_TEST_QUICK_EXPORT int qtest_quick_main(int argc, char **argv, const char *name, const char *sourceDir, qtest_create_viewport createViewport);
 
-private:
-    void log_incident(const char *type, const QString &testCase,
-                      const QString &message);
-};
+#ifndef QTEST_QUICK_SOURCE_DIR
 
-QML_DECLARE_TYPE(QDeclarativeTestReport)
+#define QTEST_QUICK_MAIN(name) \
+    int main(int argc, char **argv) \
+    { \
+        return qtest_quick_main(argc, argv, #name, 0, 0); \
+    }
+
+#define QTEST_QUICK_OPENGL_MAIN(name) \
+    static QWidget *name##_create_viewport() \
+    { \
+        return new QGLWidget(); \
+    } \
+    int main(int argc, char **argv) \
+    { \
+        return qtest_quick_main(argc, argv, #name, 0, name##_create_viewport); \
+    }
+
+#else
+
+#define QTEST_QUICK_MAIN(name) \
+    int main(int argc, char **argv) \
+    { \
+        return qtest_quick_main(argc, argv, #name, QTEST_QUICK_SOURCE_DIR, 0); \
+    }
+
+#define QTEST_QUICK_OPENGL_MAIN(name) \
+    static QWidget *name##_create_viewport() \
+    { \
+        return new QGLWidget(); \
+    } \
+    int main(int argc, char **argv) \
+    { \
+        return qtest_quick_main(argc, argv, #name, QTEST_QUICK_SOURCE_DIR, name##_create_viewport); \
+    }
+
+#endif
 
 QT_END_NAMESPACE
 
