@@ -150,7 +150,6 @@ int qtest_quick_main(int argc, char **argv, const char *name, const char *source
                                  &eventLoop, SLOT(quit()));
                 if (createViewport)
                     view.setViewport((*createViewport)());
-                view.engine()->addImportPath(testPath);
                 view.setSource(QUrl::fromLocalFile(fi.absoluteFilePath()));
                 if (view.status() == QDeclarativeView::Error) {
                     // Error compiling the test - flag failure and continue.
