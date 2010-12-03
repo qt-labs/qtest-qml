@@ -1,0 +1,18 @@
+
+QtTest module for Qt Quick
+==========================
+
+This directory contains an experimental module and test harness
+for writing QTestLib-style unit tests in QML.  Build it against
+Qt 4.7 as follows:
+
+    $ /path/to/qt/bin/qmake qtest-qml.pro
+    $ make
+    $ make install
+
+The "make install" step copies the necessary libraries, plugins,
+and QML module definitions into the Qt build tree.
+
+There is an example test case in the "tests/qmlexample" directory that
+shows how to integrate QML unit tests into a qmake-based build system.
+Also see "doc/testcases.txt" for an introduction to writing unit tests.

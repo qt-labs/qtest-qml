@@ -1,11 +1,31 @@
 
-Organization of QML/3D test cases
-=================================
+Organization of test cases
+==========================
 
-All of the test cases are in subdirectories under "tests/auto/qml3d".
-The "tst_qml3d" program searches for files in these subdirectories
-that match the pattern "tst_*.qml".  Other *.qml files may appear
-for auxillary QML components that are used by the test.
+The test cases are launched by a C++ harness that consists of
+the following code:
+
+    #include <QtTestQuick/qdeclarativetest.h>
+    QTEST_QUICK_MAIN(qmlexample)
+
+Where "qmlexample" is an identifier to use to uniquely identify
+this set of tests.
+
+The test harness looks for "tst_*.qml" files in subdirectories under
+the application's source directory, which is specified by the
+QTEST_QUICK_SOURCE_DIR macro in the *.pro file:
+
+    DEFINES += QTEST_QUICK_SOURCE_DIR=\"\\\"$$PWD\\\"\"
+
+The QTEST_QUICK_SOURCE_DIR environment variable can also be set
+at runtime to override the compiled-in default.  This variable will
+usually need to be set when the tests are run on a target device
+where the directory names are different from the host system.
+
+Other *.qml files may appear for auxillary QML components that are
+used by the test.
+
+See "tests/qmlexample" for an example of creating a test harness.
 
 Basic test cases
 ================
