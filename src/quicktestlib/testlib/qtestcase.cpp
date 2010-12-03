@@ -972,7 +972,8 @@ static int qToInt(char *str)
     return l;
 }
 
-static void qParseArgs(int argc, char *argv[])
+Q_TESTLIB_EXPORT void qtest_qParseArgs(int argc, char *argv[]);
+void qtest_qParseArgs(int argc, char *argv[])
 {
     lastTestFuncIdx = -1;
 
@@ -1691,7 +1692,7 @@ int QTest::qExec(QObject *testObject, int argc, char **argv)
     QTEST_ASSERT(metaObject);
 
     QTestResult::setCurrentTestObject(metaObject->className());
-    qParseArgs(argc, argv);
+    qtest_qParseArgs(argc, argv);
 #ifdef QTESTLIB_USE_VALGRIND
     if (QBenchmarkGlobalData::current->mode() == QBenchmarkGlobalData::CallgrindParentProcess) {
         const QStringList origAppArgs(QCoreApplication::arguments());
