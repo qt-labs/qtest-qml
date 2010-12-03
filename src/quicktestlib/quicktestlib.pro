@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET = QtTestQuick$${QT_LIBINFIX}
 CONFIG += dll warn_on
-QT += declarative testlib
+QT += declarative
 DESTDIR = ../../lib
 
 win32 {
@@ -35,6 +35,8 @@ PRIVATE_HEADERS += \
 
 PUBLIC_HEADERS += $$HEADERS
 HEADERS += $$PRIVATE_HEADERS
+
+include(testlib/testlib.pri)
 
 DEFINES += QT_BUILD_TEST_QUICK_LIB
 
