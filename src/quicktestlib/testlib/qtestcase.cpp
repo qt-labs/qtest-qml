@@ -972,7 +972,6 @@ static int qToInt(char *str)
     return l;
 }
 
-Q_TESTLIB_EXPORT void qtest_qParseArgs(int argc, char *argv[]);
 void qtest_qParseArgs(int argc, char *argv[])
 {
     lastTestFuncIdx = -1;
