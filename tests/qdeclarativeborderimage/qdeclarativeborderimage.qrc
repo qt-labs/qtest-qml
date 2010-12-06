@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>data/tst_borderimage.qml</file>
+    <file>data/InvalidSciFile.qml</file>
+    <file>data/colors.png</file>
+    <file>data/colors-round.sci</file>
+    <file>data/invalid.sci</file>
+</qresource>
+</RCC>

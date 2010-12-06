@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>data/tst_binding.qml</file>
+    <file>data/tst_binding2.qml</file>
+</qresource>
+</RCC>
