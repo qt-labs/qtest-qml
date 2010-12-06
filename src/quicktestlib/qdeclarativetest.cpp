@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include "qdeclarativetest.h"
-#include "qdeclarativetestreport_p.h"
+#include "qdeclarativetestresult_p.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeview.h>
@@ -57,13 +57,6 @@
 #include <stdio.h>
 
 QT_BEGIN_NAMESPACE
-
-// Defined in qdeclarativetestreport.cpp.
-extern bool qtest_quick_xmlOutput;
-extern int qtest_quick_passed;
-extern int qtest_quick_failed;
-extern int qtest_quick_skipped;
-extern FILE *qtest_quick_stream;
 
 class QTestQuitObject : public QObject
 {
@@ -82,14 +75,8 @@ int qtest_quick_main(int argc, char **argv, const char *name, const char *source
     QApplication app(argc, argv);
 
     // Parse the command-line arguments.
-    const char *filename = 0;
-    for (int index = 1; index < argc; ++index) {
-        QString arg = QString::fromLocal8Bit(argv[index]);
-        if (arg == QLatin1String("-xml"))
-            qtest_quick_xmlOutput = true;
-        else if (arg == QLatin1String("-o") && (index + 1) < argc)
-            filename = argv[++index];
-    }
+    QDeclarativeTestResult::parseArgs(argc, argv);
+    QDeclarativeTestResult::setProgramName(name);
 
     // Determine where to look for the test data.  On a device it will
     // typically be necessary to set QTEST_QUICK_SOURCE_DIR.
@@ -109,31 +96,11 @@ int qtest_quick_main(int argc, char **argv, const char *name, const char *source
     if (!entries.contains(QLatin1String(".")))
         entries.append(QLatin1String("."));
 
-    if (filename) {
-        qtest_quick_stream = fopen(filename, "w");
-        if (!qtest_quick_stream) {
-            perror(filename);
-            return 1;
-        }
-    } else {
-        qtest_quick_stream = stdout;
-    }
-
-    if (qtest_quick_xmlOutput) {
-        fprintf(qtest_quick_stream, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
-                        "<TestCase name=\"%s\">\n", name);
-        fprintf(qtest_quick_stream, "<Environment>\n"
-                        "   <QtVersion>%s</QtVersion>\n"
-                        "   <QTestVersion>%s</QTestVersion>\n"
-                        "</Environment>\n", qVersion(), qVersion());
-    } else {
-        fprintf(qtest_quick_stream, "********* Start testing of %s *********\n", name);
-    }
-
     // Scan through all of the "tst_*.qml" files in the subdirectories
     // and run each of them in turn with a QDeclarativeView.
     QStringList filters;
     filters += QLatin1String("tst_*.qml");
+    bool compileFail = false;
     foreach (QString name, entries) {
         QDir subdir(testPath + QDir::separator() + name);
         QStringList files = subdir.entryList(filters, QDir::Files);
@@ -153,7 +120,7 @@ int qtest_quick_main(int argc, char **argv, const char *name, const char *source
                 view.setSource(QUrl::fromLocalFile(fi.absoluteFilePath()));
                 if (view.status() == QDeclarativeView::Error) {
                     // Error compiling the test - flag failure and continue.
-                    ++qtest_quick_failed;
+                    compileFail = true;
                     continue;
                 }
                 if (!quitobj.hasQuit) {
@@ -168,18 +135,14 @@ int qtest_quick_main(int argc, char **argv, const char *name, const char *source
         }
     }
 
-    if (qtest_quick_xmlOutput) {
-        fprintf(qtest_quick_stream, "</TestCase>\n");
-    } else {
-        fprintf(qtest_quick_stream, "Totals: %d passed, %d failed, %d skipped\n",
-                qtest_quick_passed, qtest_quick_failed, qtest_quick_skipped);
-        fprintf(qtest_quick_stream, "********* Finished testing of %s *********\n", name);
-    }
+    // Flush the current logging stream.
+    QDeclarativeTestResult::setProgramName(0);
 
-    if (filename)
-        fclose(qtest_quick_stream);
-
-    return qtest_quick_failed != 0;
+    // Return the number of failures as the exit code.
+    int code = QDeclarativeTestResult::exitCode();
+    if (!code && compileFail)
+        ++code;
+    return code;
 }
 
 QT_END_NAMESPACE

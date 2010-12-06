@@ -51,6 +51,9 @@
 
 QT_BEGIN_NAMESPACE
 
+static const char *globalProgramName = 0;
+static bool loggingStarted = false;
+
 class QDeclarativeTestResultPrivate
 {
 public:
@@ -66,7 +69,6 @@ public:
     QByteArray intern(const QString &str);
     void updateTestObjectName();
 
-    QString programName;
     QString testCaseName;
     QString functionName;
     QSet<QByteArray> internedStrings;
@@ -88,21 +90,13 @@ void QDeclarativeTestResultPrivate::updateTestObjectName()
     // functions as "testCase__function".
     if (QTestLog::logMode() == QTestLog::Plain) {
         if (testCaseName.isEmpty()) {
-            if (programName.isEmpty()) {
-                QTestResult::setCurrentTestObject(0);
-            } else {
-                QTestResult::setCurrentTestObject
-                    (intern(programName).constData());
-            }
+            QTestResult::setCurrentTestObject(globalProgramName);
         } else if (QTestLog::logMode() == QTestLog::Plain) {
             QTestResult::setCurrentTestObject
                 (intern(testCaseName).constData());
         }
-    } else if (programName.isEmpty()) {
-        QTestResult::setCurrentTestObject(0);
     } else {
-        QTestResult::setCurrentTestObject
-            (intern(programName).constData());
+        QTestResult::setCurrentTestObject(globalProgramName);
     }
 }
 
@@ -116,37 +110,12 @@ QDeclarativeTestResult::~QDeclarativeTestResult()
 }
 
 /*!
-    \qmlproperty string TestResult::programName
-
-    This property defines the name of the test program that
-    is running the test cases.  If this string is set to empty,
-    then all TestCase elements have been executed and the program
-    is about to exit.
-
-    \sa testCaseName, functionName
-*/
-QString QDeclarativeTestResult::programName() const
-{
-    Q_D(const QDeclarativeTestResult);
-    return d->programName;
-}
-
-void QDeclarativeTestResult::setProgramName(const QString &name)
-{
-    Q_D(QDeclarativeTestResult);
-    d->programName = name;
-    d->updateTestObjectName();
-    emit programNameChanged();
-}
-
-/*!
     \qmlproperty string TestResult::testCaseName
 
     This property defines the name of current TestCase element
-    that is running test cases.  If this string is empty, then
-    programName will be used instead.
+    that is running test cases.
 
-    \sa programName, functionName
+    \sa functionName
 */
 QString QDeclarativeTestResult::testCaseName() const
 {
@@ -169,7 +138,7 @@ void QDeclarativeTestResult::setTestCaseName(const QString &name)
     within a TestCase element that is running.  If this string is
     empty, then no function is currently running.
 
-    \sa programName, testCaseName
+    \sa testCaseName
 */
 QString QDeclarativeTestResult::functionName() const
 {
@@ -183,10 +152,9 @@ void QDeclarativeTestResult::setFunctionName(const QString &name)
     if (!name.isEmpty()) {
         // In plain logging mode, we use the function name directly.
         // In XML logging mode, we use "testCase__functionName" as the
-        // programName is acting as the class name.
+        // program name is acting as the class name.
         if (QTestLog::logMode() == QTestLog::Plain ||
-                d->testCaseName.isEmpty() ||
-                d->testCaseName == d->programName) {
+                d->testCaseName.isEmpty()) {
             QTestResult::setCurrentTestFunction
                 (d->intern(name).constData());
         } else {
@@ -327,40 +295,51 @@ int QDeclarativeTestResult::skipCount() const
 */
 void QDeclarativeTestResult::reset()
 {
-    QTestResult::reset();
+    if (!globalProgramName)     // Only if run via qmlviewer.
+        QTestResult::reset();
 }
 
 /*!
     \qmlmethod TestResult::startLogging()
 
     Starts logging to the test output stream and writes the
-    test header for programName.
+    test header.
 
     \sa stopLogging()
 */
 void QDeclarativeTestResult::startLogging()
 {
-    // The program name is used for logging headers and footers.
+    // The program name is used for logging headers and footers if it
+    // is set.  Otherwise the test case name is used.
     Q_D(QDeclarativeTestResult);
+    if (loggingStarted)
+        return;
     const char *saved = QTestResult::currentTestObjectName();
-    QTestResult::setCurrentTestObject(d->intern(d->programName).constData());
+    if (globalProgramName) {
+        QTestResult::setCurrentTestObject(globalProgramName);
+    } else {
+        QTestResult::setCurrentTestObject
+            (d->intern(d->testCaseName).constData());
+    }
     QTestLog::startLogging();
     QTestResult::setCurrentTestObject(saved);
+    loggingStarted = true;
 }
 
 /*!
     \qmlmethod TestResult::stopLogging()
 
-    Writes the test footer for programName to the test
-    output stream and then stops logging.
+    Writes the test footer to the test output stream and then stops logging.
 
     \sa startLogging()
 */
 void QDeclarativeTestResult::stopLogging()
 {
     Q_D(QDeclarativeTestResult);
+    if (globalProgramName)
+        return;     // Logging will be stopped by setProgramName(0).
     const char *saved = QTestResult::currentTestObjectName();
-    QTestResult::setCurrentTestObject(d->intern(d->programName).constData());
+    QTestResult::setCurrentTestObject(d->intern(d->testCaseName).constData());
     QTestLog::stopLogging();
     QTestResult::setCurrentTestObject(saved);
 }
@@ -444,6 +423,38 @@ bool QDeclarativeTestResult::expectFailContinue
 void QDeclarativeTestResult::warn(const QString &message)
 {
     QTestLog::warn(message.toLatin1().constData());
+}
+
+namespace QTest {
+    void qtest_qParseArgs(int argc, char *argv[]);
+};
+
+void QDeclarativeTestResult::parseArgs(int argc, char *argv[])
+{
+    QTest::qtest_qParseArgs(argc, argv);
+}
+
+void QDeclarativeTestResult::setProgramName(const char *name)
+{
+    if (name) {
+        QTestResult::reset();
+    } else if (!name && loggingStarted) {
+        QTestResult::setCurrentTestObject(globalProgramName);
+        QTestLog::stopLogging();
+        QTestResult::setCurrentTestObject(0);
+    }
+    globalProgramName = name;
+}
+
+int QDeclarativeTestResult::exitCode()
+{
+#if defined(QTEST_NOEXITCODE)
+    return 0;
+#else
+    // make sure our exit code is never going above 127
+    // since that could wrap and indicate 0 test fails
+    return qMin(QTestResult::failCount(), 127);
+#endif
 }
 
 QT_END_NAMESPACE

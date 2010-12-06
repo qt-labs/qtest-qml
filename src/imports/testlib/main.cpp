@@ -40,9 +40,12 @@
 ****************************************************************************/
 
 #include <QtDeclarative/qdeclarativeextensionplugin.h>
-#include "qdeclarativetestreport_p.h"
+#include <QtDeclarative/qdeclarative.h>
+#include "qdeclarativetestresult_p.h"
 
 QT_BEGIN_NAMESPACE
+
+QML_DECLARE_TYPE(QDeclarativeTestResult)
 
 class QTestQmlModule : public QDeclarativeExtensionPlugin
 {
@@ -51,7 +54,7 @@ public:
     virtual void registerTypes(const char *uri)
     {
         Q_ASSERT(QLatin1String(uri) == QLatin1String("QtTest"));
-        qmlRegisterType<QDeclarativeTestReport>(uri,1,0,"TestReport");
+        qmlRegisterType<QDeclarativeTestResult>(uri,1,0,"TestResult");
     }
 };
 

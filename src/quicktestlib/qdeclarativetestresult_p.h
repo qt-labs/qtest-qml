@@ -55,7 +55,6 @@ class Q_TEST_QUICK_EXPORT QDeclarativeTestResult : public QObject
 {
     Q_OBJECT
     Q_ENUMS(FunctionType)
-    Q_PROPERTY(QString programName READ programName WRITE setProgramName NOTIFY programNameChanged)
     Q_PROPERTY(QString testCaseName READ testCaseName WRITE setTestCaseName NOTIFY testCaseNameChanged)
     Q_PROPERTY(QString functionName READ functionName WRITE setFunctionName NOTIFY functionNameChanged)
     Q_PROPERTY(FunctionType functionType READ functionType WRITE setFunctionType NOTIFY functionTypeChanged)
@@ -79,9 +78,6 @@ public:
         Func = 3,
         CleanupFunc = 4
     };
-
-    QString programName() const;
-    void setProgramName(const QString &name);
 
     QString testCaseName() const;
     void setTestCaseName(const QString &name);
@@ -125,6 +121,13 @@ public Q_SLOTS:
     bool expectFail(const QString &tag, const QString &comment);
     bool expectFailContinue(const QString &tag, const QString &comment);
     void warn(const QString &message);
+
+
+public:
+    // Helper functions for the C++ main() shell.
+    static void parseArgs(int argc, char *argv[]);
+    static void setProgramName(const char *name);
+    static int exitCode();
 
 Q_SIGNALS:
     void programNameChanged();

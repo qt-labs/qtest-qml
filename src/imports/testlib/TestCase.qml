@@ -64,156 +64,207 @@ Item {
     property bool optional: false
 
     // Internal private state
-    property string currentTestCase
-    property bool expectingFail
-    property string expectFailMsg
     property bool prevWhen: true
     property int testId: -1
+    property variant testCaseResult
 
-    TestReport { id: reporter }
+    TestResult { id: results }
 
     function fail(msg) {
         if (!msg)
             msg = "";
-        if (expectingFail) {
-            TestLogger.log_expect_fail(currentTestCase, expectFailMsg, msg)
-            throw new Error("QtTest::expect_fail")
-        } else {
-            TestLogger.log_fail(currentTestCase, msg)
-            throw new Error("QtTest::fail")
-        }
-    }
-
-    function fail2(msg, msg2) {
-        if (msg)
-            fail(msg + ": " + msg2)
-        else
-            fail(msg2)
+        results.fail(msg)
+        throw new Error("QtTest::fail")
     }
 
     function verify(cond, msg) {
-        if (!cond)
-            fail(msg)
+        if (!msg)
+            msg = "";
+        if (!results.verify(cond, msg))
+            throw new Error("QtTest::fail")
     }
 
     function compare(actual, expected, msg) {
+        var act = actual
+        var exp = expected
+        var success = false
         if (typeof actual == "number" && typeof expected == "number") {
             // Use a fuzzy compare if the two values are floats
             if (Math.abs(actual - expected) <= 0.00001)
-                return
+                success = true
         } else if (typeof actual == "object" && typeof expected == "object") {
             // Does the expected value look like a vector3d?
             if ("x" in expected && "y" in expected && "z" in expected) {
                 if (Math.abs(actual.x - expected.x) <= 0.00001 &&
                         Math.abs(actual.y - expected.y) <= 0.00001 &&
-                        Math.abs(actual.z - expected.z) <= 0.00001)
-                    return
-                fail2(msg, "actual: Qt.vector3d(" +
-                           actual.x + ", " + actual.y + ", " + actual.z +
-                           "), expected: Qt.vector3d(" +
-                           expected.x + ", " + expected.y + ", " + expected.z +
-                           ")")
-                return
+                        Math.abs(actual.z - expected.z) <= 0.00001) {
+                    success = true
+                } else {
+                    act = "Qt.vector3d(" + actual.x + ", " +
+                          actual.y + ", " + actual.z + ")"
+                    exp = "Qt.vector3d(" + expected.x + ", " +
+                          expected.y + ", " + expected.z + ")"
+                }
+            } else if (actual == expected) {
+                success = true
             }
-            if (actual == expected)
-                return
         } else if (actual == expected) {
-            return
+            success = true
         }
-        fail2(msg, "actual: " + actual + ", expected: " + expected)
+        if (!msg)
+            msg = ""
+        if (!results.compare(success, msg, act, exp))
+            throw new Error("QtTest::fail")
     }
 
     function skip(msg) {
-        TestLogger.log_skip(currentTestCase, msg)
+        if (!msg)
+            msg = ""
+        results.skipSingle(msg)
         throw new Error("QtTest::skip")
     }
 
-    function expectFail(msg) {
-        expectingFail = true
-        expectFailMsg = msg
+    function skipAll(msg) {
+        if (!msg)
+            msg = ""
+        results.skipAll(msg)
+        throw new Error("QtTest::skip")
     }
 
-    property variant testCaseResult
+    function expectFail(tag, msg) {
+        if (!tag)
+            tag = ""
+        if (!msg)
+            msg = ""
+        if (!results.expectFail(tag, msg))
+            throw new Error("QtTest::expectFail")
+    }
 
-    function runInternal(prop, dataDriven, arg, tag) {
-        currentTestCase = TestLogger.log_prefixed_name(name, prop)
-        if (dataDriven && tag)
-            currentTestCase += " [" + tag + "]"
-        expectingFail = false
-        var success = true
+    function expectFailContinue(tag, msg) {
+        if (!tag)
+            tag = ""
+        if (!msg)
+            msg = ""
+        if (!results.expectFailContinue(tag, msg))
+            throw new Error("QtTest::expectFail")
+    }
+
+    function warn(msg) {
+        if (!msg)
+            msg = ""
+        results.warn(msg);
+    }
+
+    // Functions that can be overridden in subclasses for init/cleanup duties.
+    function initTestCase() {}
+    function cleanupTestCase() {}
+    function init() {}
+    function cleanup() {}
+
+    function runInternal(prop, arg) {
         try {
             testCaseResult = testCase[prop](arg)
-            if (expectingFail) {
-                success = false
-                TestLogger.log_expect_fail_pass(currentTestCase)
-            } else if (!dataDriven) {
-                TestLogger.log_pass(currentTestCase)
-            }
         } catch (e) {
             testCaseResult = []
-            if (e.message == "QtTest::fail") {
-                success = false
-            } else if (e.message.indexOf("QtTest::") != 0) {
+            if (e.message.indexOf("QtTest::") != 0) {
                 // Test threw an unrecognized exception - fail.
-                TestLogger.log_fail(currentTestCase, e.message)
-                success = false
+                fail(e.message)
             }
         }
-        return success
+        return !results.dataFailed
+    }
+
+    function runFunction(prop, arg) {
+        results.functionType = TestResult.InitFunc
+        runInternal("init")
+        if (!results.skipped) {
+            results.functionType = TestResult.Func
+            runInternal(prop, arg)
+            results.functionType = TestResult.CleanupFunc
+            runInternal("cleanup")
+        }
+        results.functionType = TestResult.NoWhere
     }
 
     function run() {
-        TestLogger.log_start_test(reporter)
-        var success = true
-        running = true
-        var testList = []
-        for (var prop in testCase) {
-            if (prop.indexOf("test_") != 0)
-                continue
-            var tail = prop.lastIndexOf("_data");
-            if (tail != -1 && tail == (prop.length - 5))
-                continue
-            testList.push(prop)
+        if (TestLogger.log_start_test()) {
+            results.reset()
+            results.testCaseName = name
+            results.startLogging()
+        } else {
+            results.testCaseName = name
         }
-        testList.sort()
+        running = true
+
+        // Run the initTestCase function.
+        results.functionName = "initTestCase"
+        results.functionType = TestResult.InitFunc
+        var runTests = true
+        if (!runInternal("initTestCase"))
+            runTests = false
+        results.finishTestFunction()
+
+        // Run the test methods.
+        var testList = []
+        if (runTests) {
+            for (var prop in testCase) {
+                if (prop.indexOf("test_") != 0)
+                    continue
+                var tail = prop.lastIndexOf("_data");
+                if (tail != -1 && tail == (prop.length - 5))
+                    continue
+                testList.push(prop)
+            }
+            testList.sort()
+        }
         for (var index in testList) {
             var prop = testList[index]
             var datafunc = prop + "_data"
+            results.functionName = prop
             if (datafunc in testCase) {
-                if (runInternal(datafunc, true)) {
+                results.functionType = TestResult.DataFunc
+                if (runInternal(datafunc)) {
                     var table = testCaseResult
-                    var successThis = true
                     var haveData = false
+                    results.initTestTable()
                     for (var index in table) {
                         haveData = true
                         var row = table[index]
-                        if (!runInternal(prop, true, row, row.tag))
-                            successThis = false
+                        if (!row.tag)
+                            row.tag = "row " + index    // Must have something
+                        results.dataTag = row.tag
+                        runFunction(prop, row)
                     }
                     if (!haveData)
-                        TestLogger.log_message("WARNING: no data supplied for " + prop + "() by " + datafunc + "()")
-                    if (successThis) {
-                        var prefix;
-                        if (name)
-                            prefix = name + "::"
-                        currentTestCase = prefix + prop + "()"
-                        TestLogger.log_pass(currentTestCase)
-                    } else {
-                        success = false
-                    }
-                } else {
-                    success = false
+                        results.warn("no data supplied for " + prop + "() by " + datafunc + "()")
+                    results.clearTestTable()
                 }
             } else {
-                if (!runInternal(prop, false))
-                    success = false
+                runFunction(prop)
             }
+            results.finishTestFunction()
+            results.skipped = false
+            results.dataTag = ""
         }
-        currentTestCase = ""
+
+        // Run the cleanupTestCase function.
+        results.skipped = false
+        results.functionName = "cleanupTestCase"
+        results.functionType = TestResult.CleanupFunc
+        runInternal("cleanupTestCase")
+
+        // Clean up and exit.
         running = false
         completed = true
-        TestLogger.log_complete_test(testId, reporter)
-        return success
+        results.finishTestFunction()
+        results.functionName = ""
+
+        // Stop if there are no more tests to be run.
+        if (!TestLogger.log_complete_test(testId)) {
+            results.stopLogging()
+            Qt.quit()
+        }
+        results.testCaseName = ""
     }
 
     onWhenChanged: {
