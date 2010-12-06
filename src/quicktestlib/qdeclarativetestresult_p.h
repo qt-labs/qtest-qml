@@ -135,7 +135,6 @@ Q_SIGNALS:
     void functionNameChanged();
     void functionTypeChanged();
     void dataTagChanged();
-    void globalDataTagChanged();
     void skippedChanged();
 
 private:
