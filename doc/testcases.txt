@@ -80,15 +80,32 @@ A number of helper functions are available to assist with writing tests:
         - Compare "actual" with "expected", fail with "msg" if not.
         - Similar to QCOMPARE in C++
 
-    skip(msg)
+    skip(msg)                   ["Single" mode]
+    skipAll(msg)
         - Skip the current test and show "msg".
         - Similar to QSKIP in C++
 
-    expectFail(msg)
+    expectFail(msg)             ["Abort" mode]
+    expectFailContinue(msg)
         - Mark the current test as expected to fail, with "msg" on failure.
+
+    warn(msg)
+        - Similar to QWARN in C++
 
 The "msg" parameters can be omitted if there is no particular message
 that should be displayed other than "FAIL" or "SKIP".
+
+Special functions
+=================
+
+The following special function names have the same meaning as in C++:
+
+    initTestCase()
+    cleanupTestCase()
+    init()
+    cleanup()
+
+Note: The initTestCase_data() function from C++ is not supported.
 
 Data-driven tests
 =================
