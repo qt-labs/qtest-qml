@@ -52,14 +52,12 @@ QT_BEGIN_NAMESPACE
 
 typedef QWidget *(*qtest_create_viewport)();
 
-Q_TEST_QUICK_EXPORT int qtest_quick_main(int argc, char **argv, const char *name, const char *sourceDir, qtest_create_viewport createViewport);
-
-#ifndef QTEST_QUICK_SOURCE_DIR
+Q_TEST_QUICK_EXPORT int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport);
 
 #define QTEST_QUICK_MAIN(name) \
     int main(int argc, char **argv) \
     { \
-        return qtest_quick_main(argc, argv, #name, 0, 0); \
+        return qtest_quick_main(argc, argv, #name, 0); \
     }
 
 #define QTEST_QUICK_OPENGL_MAIN(name) \
@@ -69,28 +67,10 @@ Q_TEST_QUICK_EXPORT int qtest_quick_main(int argc, char **argv, const char *name
     } \
     int main(int argc, char **argv) \
     { \
-        return qtest_quick_main(argc, argv, #name, 0, name##_create_viewport); \
+        return qtest_quick_main(argc, argv, #name, name##_create_viewport); \
     }
 
 #else
-
-#define QTEST_QUICK_MAIN(name) \
-    int main(int argc, char **argv) \
-    { \
-        return qtest_quick_main(argc, argv, #name, QTEST_QUICK_SOURCE_DIR, 0); \
-    }
-
-#define QTEST_QUICK_OPENGL_MAIN(name) \
-    static QWidget *name##_create_viewport() \
-    { \
-        return new QGLWidget(); \
-    } \
-    int main(int argc, char **argv) \
-    { \
-        return qtest_quick_main(argc, argv, #name, QTEST_QUICK_SOURCE_DIR, name##_create_viewport); \
-    }
-
-#endif
 
 QT_END_NAMESPACE
 

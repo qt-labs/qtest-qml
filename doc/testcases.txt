@@ -11,16 +11,19 @@ the following code:
 Where "qmlexample" is an identifier to use to uniquely identify
 this set of tests.
 
-The test harness looks for "tst_*.qml" files in subdirectories under
-the application's source directory, which is specified by the
-QTEST_QUICK_SOURCE_DIR macro in the *.pro file:
+The test harness scans recursively for "tst_*.qml" files in the qrc
+resources that are bound into the test harness binary.  The following
+is an example .qrc file:
 
-    DEFINES += QTEST_QUICK_SOURCE_DIR=\"\\\"$$PWD\\\"\"
+    <!DOCTYPE RCC><RCC version="1.0">
+    <qresource>
+        <file>tst_basic.qml</file>
+        <file>tst_item.qml</file>
+    </qresource>
+    </RCC>
 
 The QTEST_QUICK_SOURCE_DIR environment variable can also be set
-at runtime to override the compiled-in default.  This variable will
-usually need to be set when the tests are run on a target device
-where the directory names are different from the host system.
+at runtime to run test cases from a non-resource directory.
 
 Other *.qml files may appear for auxillary QML components that are
 used by the test.

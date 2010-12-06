@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>tst_basic.qml</file>
+    <file>tst_item.qml</file>
+</qresource>
+</RCC>

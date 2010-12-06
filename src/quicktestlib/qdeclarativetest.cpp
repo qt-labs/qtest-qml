@@ -50,6 +50,7 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qdiriterator.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qeventloop.h>
@@ -70,68 +71,71 @@ private Q_SLOTS:
     void quit() { hasQuit = true; }
 };
 
-int qtest_quick_main(int argc, char **argv, const char *name, const char *sourceDir, qtest_create_viewport createViewport)
+int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport)
 {
     QApplication app(argc, argv);
+
+    // Determine where to look for the test data.  If QTEST_QUICK_SOURCE_DIR
+    // is set, then use that.  Otherwise scan the application's resources.
+    QString testPath = QString::fromLocal8Bit(qgetenv("QTEST_QUICK_SOURCE_DIR"));
+    if (testPath.isEmpty())
+        testPath = QLatin1String(":/");
+
+    // Scan the test data directory recursively, looking for "tst_*.qml" files.
+    QStringList filters;
+    filters += QLatin1String("tst_*.qml");
+    QStringList files;
+    QDirIterator iter(testPath, filters, QDir::Files,
+                      QDirIterator::Subdirectories |
+                      QDirIterator::FollowSymlinks);
+    while (iter.hasNext())
+        files += iter.next();
+    files.sort();
+
+    // Bail out if we didn't find any test cases.
+    if (files.isEmpty()) {
+        qWarning() << argv[1] << ": could not find any test cases under"
+                   << testPath;
+        return 1;
+    }
 
     // Parse the command-line arguments.
     QDeclarativeTestResult::parseArgs(argc, argv);
     QDeclarativeTestResult::setProgramName(name);
 
-    // Determine where to look for the test data.  On a device it will
-    // typically be necessary to set QTEST_QUICK_SOURCE_DIR.
-    QString testPath = QString::fromLocal8Bit(qgetenv("QTEST_QUICK_SOURCE_DIR"));
-    if (testPath.isEmpty() && sourceDir)
-        testPath = QString::fromLocal8Bit(sourceDir);
-    if (!testPath.isEmpty() && !QFile::exists(testPath))
-        testPath = QString();
-    if (testPath.isEmpty())
-        testPath = QLatin1String(".");
-
-    // Find the subdirectories that look like they may contain test cases.
-    // We also include "." in this list.
-    QDir dir(testPath);
-    QStringList entries = dir.entryList(QDir::Dirs);
-    entries.removeAll(QLatin1String(".."));
-    if (!entries.contains(QLatin1String(".")))
-        entries.append(QLatin1String("."));
-
-    // Scan through all of the "tst_*.qml" files in the subdirectories
-    // and run each of them in turn with a QDeclarativeView.
-    QStringList filters;
-    filters += QLatin1String("tst_*.qml");
+    // Scan through all of the "tst_*.qml" files and run each of them
+    // in turn with a QDeclarativeView.
     bool compileFail = false;
-    foreach (QString name, entries) {
-        QDir subdir(testPath + QDir::separator() + name);
-        QStringList files = subdir.entryList(filters, QDir::Files);
-        foreach (QString file, files) {
-            QString source = subdir.path() + QDir::separator() + file;
-            QFileInfo fi(source);
-            if (fi.exists()) {
-                QDeclarativeView view;
-                QTestQuitObject quitobj;
-                QEventLoop eventLoop;
-                QObject::connect(view.engine(), SIGNAL(quit()),
-                                 &quitobj, SLOT(quit()));
-                QObject::connect(view.engine(), SIGNAL(quit()),
-                                 &eventLoop, SLOT(quit()));
-                if (createViewport)
-                    view.setViewport((*createViewport)());
-                view.setSource(QUrl::fromLocalFile(fi.absoluteFilePath()));
-                if (view.status() == QDeclarativeView::Error) {
-                    // Error compiling the test - flag failure and continue.
-                    compileFail = true;
-                    continue;
-                }
-                if (!quitobj.hasQuit) {
-                    // If the test already quit, then it was performed
-                    // synchronously during setSource().  Otherwise it is
-                    // an asynchronous test and we need to show the window
-                    // and wait for the quit indication.
-                    view.show();
-                    eventLoop.exec();
-                }
-            }
+    foreach (QString file, files) {
+        QFileInfo fi(file);
+        if (!fi.exists())
+            continue;
+        QDeclarativeView view;
+        QTestQuitObject quitobj;
+        QEventLoop eventLoop;
+        QObject::connect(view.engine(), SIGNAL(quit()),
+                         &quitobj, SLOT(quit()));
+        QObject::connect(view.engine(), SIGNAL(quit()),
+                         &eventLoop, SLOT(quit()));
+        if (createViewport)
+            view.setViewport((*createViewport)());
+        QString path = fi.absoluteFilePath();
+        if (path.startsWith(QLatin1String(":/")))
+            view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
+        else
+            view.setSource(QUrl::fromLocalFile(path));
+        if (view.status() == QDeclarativeView::Error) {
+            // Error compiling the test - flag failure and continue.
+            compileFail = true;
+            continue;
+        }
+        if (!quitobj.hasQuit) {
+            // If the test already quit, then it was performed
+            // synchronously during setSource().  Otherwise it is
+            // an asynchronous test and we need to show the window
+            // and wait for the quit indication.
+            view.show();
+            eventLoop.exec();
         }
     }
 
