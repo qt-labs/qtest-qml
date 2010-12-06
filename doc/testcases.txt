@@ -92,6 +92,10 @@ A number of helper functions are available to assist with writing tests:
     warn(msg)
         - Similar to QWARN in C++
 
+    ignoreWarning(msg)
+        - Ignore warning message
+        - Similar to QTest::ignoreMessage(QtWarningMsg, msg)
+
 The "msg" parameters can be omitted if there is no particular message
 that should be displayed other than "FAIL" or "SKIP".
 

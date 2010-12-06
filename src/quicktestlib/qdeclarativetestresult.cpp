@@ -425,6 +425,11 @@ void QDeclarativeTestResult::warn(const QString &message)
     QTestLog::warn(message.toLatin1().constData());
 }
 
+void QDeclarativeTestResult::ignoreWarning(const QString &message)
+{
+    QTestResult::ignoreMessage(QtWarningMsg, message.toLatin1().constData());
+}
+
 namespace QTest {
     void qtest_qParseArgs(int argc, char *argv[]);
 };

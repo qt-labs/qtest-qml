@@ -155,6 +155,12 @@ Item {
         results.warn(msg);
     }
 
+    function ignoreWarning(msg) {
+        if (!msg)
+            msg = ""
+        results.ignoreWarning(msg)
+    }
+
     // Functions that can be overridden in subclasses for init/cleanup duties.
     function initTestCase() {}
     function cleanupTestCase() {}

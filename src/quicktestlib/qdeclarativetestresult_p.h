@@ -122,6 +122,7 @@ public Q_SLOTS:
     bool expectFailContinue(const QString &tag, const QString &comment);
     void warn(const QString &message);
 
+    void ignoreWarning(const QString &message);
 
 public:
     // Helper functions for the C++ main() shell.
