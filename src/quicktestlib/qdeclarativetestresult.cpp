@@ -70,7 +70,6 @@ public:
     QString testCaseName;
     QString functionName;
     QSet<QByteArray> internedStrings;
-    QMap<QString, int> globalTags;
     QTestTable *table;
 };
 
@@ -217,8 +216,6 @@ void QDeclarativeTestResult::setFunctionType(FunctionType type)
 
     This property defines the tag for the current row in a
     data-driven test, or an empty string if not a data-driven test.
-
-    \sa globalDataTag
 */
 QString QDeclarativeTestResult::dataTag() const
 {
@@ -238,38 +235,6 @@ void QDeclarativeTestResult::setDataTag(const QString &tag)
     } else {
         QTestResult::setCurrentTestData(0);
     }
-}
-
-/*!
-    \qmlproperty string TestResult::globalDataTag
-
-    This property defines the tag for the current row in the
-    global data table, or the empty string if the global data
-    table is not in use.
-
-    \sa dataTag, addGlobalDataTag()
-*/
-QString QDeclarativeTestResult::globalDataTag() const
-{
-    const char *tag = QTestResult::currentGlobalDataTag();
-    if (tag)
-        return QString::fromUtf8(tag);
-    else
-        return QString();
-}
-
-void QDeclarativeTestResult::setGlobalDataTag(const QString &tag)
-{
-    Q_D(QDeclarativeTestResult);
-    if (!tag.isEmpty()) {
-        int index = d->globalTags.value(tag, -1);
-        Q_ASSERT(index >= 0);
-        QTestResult::setCurrentGlobalTestData
-            (QTestTable::globalTestTable()->testData(index));
-    } else {
-        QTestResult::setCurrentGlobalTestData(0);
-    }
-    emit globalDataTagChanged();
 }
 
 /*!
@@ -400,29 +365,6 @@ void QDeclarativeTestResult::stopLogging()
     QTestResult::setCurrentTestObject(saved);
 }
 
-void QDeclarativeTestResult::initGlobalTestTable()
-{
-    Q_D(QDeclarativeTestResult);
-    d->globalTags.clear();
-    QTestTable::clearGlobalTestTable();
-    QTestTable::globalTestTable();
-    Q_ASSERT(QTestTable::currentTestTable() == QTestTable::globalTestTable());
-}
-
-void QDeclarativeTestResult::clearGlobalTestTable()
-{
-    QTestTable::clearGlobalTestTable();
-}
-
-void QDeclarativeTestResult::addGlobalDataTag(const QString &tag)
-{
-    Q_D(QDeclarativeTestResult);
-    Q_ASSERT(!tag.isEmpty());
-    if (!d->globalTags.contains(tag))
-        d->globalTags.insert(tag, d->globalTags.count());
-    QTest::newRow(tag.toUtf8().constData());
-}
-
 void QDeclarativeTestResult::initTestTable()
 {
     Q_D(QDeclarativeTestResult);
@@ -479,6 +421,24 @@ void QDeclarativeTestResult::skipAll(const QString &message)
     QTestResult::addSkip(message.toLatin1().constData(),
                          QTest::SkipAll, "", 0);
     QTestResult::setSkipCurrentTest(true);
+}
+
+bool QDeclarativeTestResult::expectFail
+    (const QString &tag, const QString &comment)
+{
+    return QTestResult::expectFail
+        (tag.toLatin1().constData(),
+         QTest::toString(comment.toLatin1().constData()),
+         QTest::Abort, "", 0);
+}
+
+bool QDeclarativeTestResult::expectFailContinue
+    (const QString &tag, const QString &comment)
+{
+    return QTestResult::expectFail
+        (tag.toLatin1().constData(),
+         QTest::toString(comment.toLatin1().constData()),
+         QTest::Continue, "", 0);
 }
 
 void QDeclarativeTestResult::warn(const QString &message)

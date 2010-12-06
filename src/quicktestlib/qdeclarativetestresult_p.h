@@ -60,7 +60,6 @@ class Q_TEST_QUICK_EXPORT QDeclarativeTestResult : public QObject
     Q_PROPERTY(QString functionName READ functionName WRITE setFunctionName NOTIFY functionNameChanged)
     Q_PROPERTY(FunctionType functionType READ functionType WRITE setFunctionType NOTIFY functionTypeChanged)
     Q_PROPERTY(QString dataTag READ dataTag WRITE setDataTag NOTIFY dataTagChanged)
-    Q_PROPERTY(QString globalDataTag READ globalDataTag WRITE setGlobalDataTag NOTIFY globalDataTagChanged)
     Q_PROPERTY(bool failed READ isFailed)
     Q_PROPERTY(bool dataFailed READ isDataFailed)
     Q_PROPERTY(bool skipped READ isSkipped WRITE setSkipped NOTIFY skippedChanged)
@@ -96,9 +95,6 @@ public:
     QString dataTag() const;
     void setDataTag(const QString &tag);
 
-    QString globalDataTag() const;
-    void setGlobalDataTag(const QString &tag);
-
     bool isFailed() const;
     bool isDataFailed() const;
 
@@ -115,10 +111,6 @@ public Q_SLOTS:
     void startLogging();
     void stopLogging();
 
-    void initGlobalTestTable();
-    void clearGlobalTestTable();
-    void addGlobalDataTag(const QString &tag);
-
     void initTestTable();
     void clearTestTable();
 
@@ -130,6 +122,8 @@ public Q_SLOTS:
                  const QString &val1, const QString &val2);
     void skipSingle(const QString &message);
     void skipAll(const QString &message);
+    bool expectFail(const QString &tag, const QString &comment);
+    bool expectFailContinue(const QString &tag, const QString &comment);
     void warn(const QString &message);
 
 Q_SIGNALS:
