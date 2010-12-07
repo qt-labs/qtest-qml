@@ -80,6 +80,13 @@ A number of helper functions are available to assist with writing tests:
         - Compare "actual" with "expected", fail with "msg" if not.
         - Similar to QCOMPARE in C++
 
+    tryCompare(obj, prop, value[, timeout])
+        - Tries comparing the property called "prop" on "obj" with "value".
+          If the compare fails, wait for up to "timeout" milliseconds,
+          processing Qt events, until the property becomes "value".
+        - The default timeout is 5000 milliseconds.
+        - e.g. tryCompare(img, "status", BorderImage.Ready)
+
     skip(msg)                   ["Single" mode]
     skipAll(msg)
         - Skip the current test and show "msg".
@@ -151,6 +158,15 @@ case failed amongst a set of otherwise passing tests.
 
 Asynchronous testing
 ====================
+
+The easiest method for asynchronous testing is to use tryCompare() to
+wait for a property to transition to an expected value.  For example:
+
+    tryCompare(img, "status", BorderImage.Ready)
+    compare(img.width, 120)
+    compare(img.height, 120)
+    compare(img.horizontalTileMode, BorderImage.Stretch)
+    compare(img.verticalTileMode, BorderImage.Stretch)
 
 The "when" property can be used to cause a "TestCase" element to trigger
 only when a certain condition is true.  For example, the following example

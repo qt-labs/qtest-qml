@@ -101,7 +101,48 @@ Item {
             compare(noSource.verticalTileMode, BorderImage.Stretch)
         }
 
-        // TODO: imageSource()
+        function test_imageSource_data() {
+            return [
+                {
+                    tag: "local",
+                    source: "colors.png",
+                    remote: false,
+                    error: ""
+                },
+                {
+                    tag: "local not found",
+                    source: "no-such-file.png",
+                    remote: false,
+                    error: "qrc:data/inline:1:21: QML BorderImage: Cannot open: qrc:data/no-such-file.png"
+                }
+                // TODO: remote tests that need to use http
+            ]
+        }
+
+        function test_imageSource(row) {
+            var expectError = (row.error.length != 0)
+            if (expectError)
+                ignoreWarning(row.error)
+
+            var img = Qt.createQmlObject
+                ('import QtQuick 1.0; BorderImage { source: "' +
+                    row.source + '" }', top)
+
+            if (row.remote)
+                tryCompare(img, "status", BorderImage.Loading)
+
+            if (!expectError) {
+                tryCompare(img, "status", BorderImage.Ready)
+                compare(img.width, 120)
+                compare(img.height, 120)
+                compare(img.horizontalTileMode, BorderImage.Stretch)
+                compare(img.verticalTileMode, BorderImage.Stretch)
+            } else {
+                tryCompare(img, "status", BorderImage.Error)
+            }
+
+            img.destroy()
+        }
 
         function test_clearSource() {
             compare(clearSource.source, "qrc:data/colors.png")
@@ -141,7 +182,53 @@ Item {
             compare(tileModes2.verticalTileMode, BorderImage.Round)
         }
 
-        // TODO: sciSource()
+        function test_sciSource_data() {
+            return [
+                {
+                    tag: "local",
+                    source: "colors-round.sci",
+                    sourceUrl: "qrc:data/colors-round.sci",
+                    remote: false,
+                    valid: true
+                },
+                {
+                    tag: "local not found",
+                    source: "no-such-file.sci",
+                    sourceUrl: "qrc:data/no-such-file.sci",
+                    remote: false,
+                    valid: false
+                }
+                // TODO: remote tests that need to use http
+            ]
+        }
+
+        function test_sciSource(row) {
+            var img = Qt.createQmlObject
+                ('import QtQuick 1.0; BorderImage { source: "' +
+                    row.source + '"; width: 300; height: 300 }', top)
+
+            if (row.remote)
+                tryCompare(img, "status", BorderImage.Loading)
+
+            compare(img.source, row.sourceUrl)
+            compare(img.width, 300)
+            compare(img.height, 300)
+
+            if (row.valid) {
+                tryCompare(img, "status", BorderImage.Ready)
+                compare(img.border.left, 10)
+                compare(img.border.top, 20)
+                compare(img.border.right, 30)
+                compare(img.border.bottom, 40)
+                compare(img.horizontalTileMode, BorderImage.Round)
+                compare(img.verticalTileMode, BorderImage.Repeat)
+            } else {
+                tryCompare(img, "status", BorderImage.Error)
+            }
+
+            img.destroy()
+        }
+
 
         function test_invalidSciFile() {
             ignoreWarning("QDeclarativeGridScaledImage: Invalid tile rule specified. Using Stretch.") // for "Roun"
@@ -156,7 +243,5 @@ Item {
             compare(invalidSciFile.horizontalTileMode, BorderImage.Stretch)
             compare(invalidSciFile.verticalTileMode, BorderImage.Stretch)
         }
-
-        // TODO: pendingRemoteRequest()
     }
 }

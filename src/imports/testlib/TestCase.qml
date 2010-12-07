@@ -84,9 +84,7 @@ Item {
             throw new Error("QtTest::fail")
     }
 
-    function compare(actual, expected, msg) {
-        var act = actual
-        var exp = expected
+    function compareInternal(actual, expected) {
         var success = false
         if (typeof actual == "number" && typeof expected == "number") {
             // Use a fuzzy compare if the two values are floats
@@ -99,11 +97,6 @@ Item {
                         Math.abs(actual.y - expected.y) <= 0.00001 &&
                         Math.abs(actual.z - expected.z) <= 0.00001) {
                     success = true
-                } else {
-                    act = "Qt.vector3d(" + actual.x + ", " +
-                          actual.y + ", " + actual.z + ")"
-                    exp = "Qt.vector3d(" + expected.x + ", " +
-                          expected.y + ", " + expected.z + ")"
                 }
             } else if (actual == expected) {
                 success = true
@@ -111,10 +104,40 @@ Item {
         } else if (actual == expected) {
             success = true
         }
+        return success
+    }
+
+    function formatValue(value) {
+        if (typeof value == "object") {
+            if ("x" in value && "y" in value && "z" in value) {
+                return "Qt.vector3d(" + value.x + ", " +
+                       value.y + ", " + value.z + ")"
+            }
+        }
+        return value
+    }
+
+    function compare(actual, expected, msg) {
+        var act = formatValue(actual)
+        var exp = formatValue(expected)
+        var success = compareInternal(actual, expected)
         if (!msg)
             msg = ""
         if (!results.compare(success, msg, act, exp))
             throw new Error("QtTest::fail")
+    }
+
+    function tryCompare(obj, prop, value, timeout) {
+        if (!timeout)
+            timeout = 5000
+        if (!compareInternal(obj[prop], value))
+            wait(0)
+        var i = 0
+        while (i < timeout && !compareInternal(obj[prop], value)) {
+            wait(50)
+            i += 50
+        }
+        compare(obj[prop], value, "property " + prop)
     }
 
     function skip(msg) {
