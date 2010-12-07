@@ -240,6 +240,7 @@ Item {
                             row.tag = "row " + index    // Must have something
                         results.dataTag = row.tag
                         runFunction(prop, row)
+                        results.dataTag = ""
                     }
                     if (!haveData)
                         results.warn("no data supplied for " + prop + "() by " + datafunc + "()")
@@ -250,7 +251,6 @@ Item {
             }
             results.finishTestFunction()
             results.skipped = false
-            results.dataTag = ""
         }
 
         // Run the cleanupTestCase function.
