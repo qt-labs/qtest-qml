@@ -112,14 +112,18 @@ public Q_SLOTS:
 
     void finishTestFunction();
 
-    void fail(const QString &message);
-    bool verify(bool success, const QString &message);
+    void fail(const QString &message, const QString &file, int line);
+    bool verify(bool success, const QString &message,
+                const QString &file, int line);
     bool compare(bool success, const QString &message,
-                 const QString &val1, const QString &val2);
-    void skipSingle(const QString &message);
-    void skipAll(const QString &message);
-    bool expectFail(const QString &tag, const QString &comment);
-    bool expectFailContinue(const QString &tag, const QString &comment);
+                 const QString &val1, const QString &val2,
+                 const QString &file, int line);
+    void skipSingle(const QString &message, const QString &file, int line);
+    void skipAll(const QString &message, const QString &file, int line);
+    bool expectFail(const QString &tag, const QString &comment,
+                    const QString &file, int line);
+    bool expectFailContinue(const QString &tag, const QString &comment,
+                            const QString &file, int line);
     void warn(const QString &message);
 
     void ignoreWarning(const QString &message);

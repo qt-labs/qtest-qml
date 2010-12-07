@@ -73,14 +73,14 @@ Item {
     function fail(msg) {
         if (!msg)
             msg = "";
-        results.fail(msg)
+        results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtTest::fail")
     }
 
     function verify(cond, msg) {
         if (!msg)
             msg = "";
-        if (!results.verify(cond, msg))
+        if (!results.verify(cond, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtTest::fail")
     }
 
@@ -123,7 +123,7 @@ Item {
         var success = compareInternal(actual, expected)
         if (!msg)
             msg = ""
-        if (!results.compare(success, msg, act, exp))
+        if (!results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtTest::fail")
     }
 
@@ -137,20 +137,25 @@ Item {
             wait(50)
             i += 50
         }
-        compare(obj[prop], value, "property " + prop)
+        var actual = obj[prop]
+        var act = formatValue(actual)
+        var exp = formatValue(value)
+        var success = compareInternal(actual, value)
+        if (!results.compare(success, "property " + prop, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+            throw new Error("QtTest::fail")
     }
 
     function skip(msg) {
         if (!msg)
             msg = ""
-        results.skipSingle(msg)
+        results.skipSingle(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtTest::skip")
     }
 
     function skipAll(msg) {
         if (!msg)
             msg = ""
-        results.skipAll(msg)
+        results.skipAll(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtTest::skip")
     }
 
@@ -159,7 +164,7 @@ Item {
             tag = ""
         if (!msg)
             msg = ""
-        if (!results.expectFail(tag, msg))
+        if (!results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtTest::expectFail")
     }
 
@@ -168,7 +173,7 @@ Item {
             tag = ""
         if (!msg)
             msg = ""
-        if (!results.expectFailContinue(tag, msg))
+        if (!results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtTest::expectFail")
     }
 

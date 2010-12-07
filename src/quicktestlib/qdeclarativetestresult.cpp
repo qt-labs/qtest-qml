@@ -364,61 +364,70 @@ void QDeclarativeTestResult::finishTestFunction()
     QTestResult::finishedCurrentTestFunction();
 }
 
-void QDeclarativeTestResult::fail(const QString &message)
+void QDeclarativeTestResult::fail
+    (const QString &message, const QString &file, int line)
 {
-    QTestResult::addFailure(message.toLatin1().constData(), "", 0);
+    QTestResult::addFailure(message.toLatin1().constData(),
+                            file.toLatin1().constData(), line);
 }
 
-bool QDeclarativeTestResult::verify(bool success, const QString &message)
+bool QDeclarativeTestResult::verify
+    (bool success, const QString &message, const QString &file, int line)
 {
     if (message.isEmpty()) {
-        return QTestResult::verify(success, "verify()", "", "", 0);
+        return QTestResult::verify
+            (success, "verify()", "", file.toLatin1().constData(), line);
     } else {
         return QTestResult::verify
-            (success, message.toLatin1().constData(), "", "", 0);
+            (success, message.toLatin1().constData(), "",
+             file.toLatin1().constData(), line);
     }
 }
 
 bool QDeclarativeTestResult::compare
     (bool success, const QString &message,
-     const QString &val1, const QString &val2)
+     const QString &val1, const QString &val2,
+     const QString &file, int line)
 {
     return QTestResult::compare
         (success, message.toLocal8Bit().constData(),
          QTest::toString(val1.toLatin1().constData()),
          QTest::toString(val2.toLatin1().constData()),
-         "", "", "", 0);
+         "", "",
+         file.toLatin1().constData(), line);
 }
 
-void QDeclarativeTestResult::skipSingle(const QString &message)
+void QDeclarativeTestResult::skipSingle
+    (const QString &message, const QString &file, int line)
 {
     QTestResult::addSkip(message.toLatin1().constData(),
-                         QTest::SkipSingle, "", 0);
+                         QTest::SkipSingle, file.toLatin1().constData(), line);
 }
 
-void QDeclarativeTestResult::skipAll(const QString &message)
+void QDeclarativeTestResult::skipAll
+    (const QString &message, const QString &file, int line)
 {
     QTestResult::addSkip(message.toLatin1().constData(),
-                         QTest::SkipAll, "", 0);
+                         QTest::SkipAll, file.toLatin1().constData(), line);
     QTestResult::setSkipCurrentTest(true);
 }
 
 bool QDeclarativeTestResult::expectFail
-    (const QString &tag, const QString &comment)
+    (const QString &tag, const QString &comment, const QString &file, int line)
 {
     return QTestResult::expectFail
         (tag.toLatin1().constData(),
          QTest::toString(comment.toLatin1().constData()),
-         QTest::Abort, "", 0);
+         QTest::Abort, file.toLatin1().constData(), line);
 }
 
 bool QDeclarativeTestResult::expectFailContinue
-    (const QString &tag, const QString &comment)
+    (const QString &tag, const QString &comment, const QString &file, int line)
 {
     return QTestResult::expectFail
         (tag.toLatin1().constData(),
          QTest::toString(comment.toLatin1().constData()),
-         QTest::Continue, "", 0);
+         QTest::Continue, file.toLatin1().constData(), line);
 }
 
 void QDeclarativeTestResult::warn(const QString &message)
