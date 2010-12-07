@@ -161,6 +161,14 @@ Item {
         results.ignoreWarning(msg)
     }
 
+    function wait(ms) {
+        results.wait(ms)
+    }
+
+    function sleep(ms) {
+        results.sleep(ms)
+    }
+
     // Functions that can be overridden in subclasses for init/cleanup duties.
     function initTestCase() {}
     function cleanupTestCase() {}

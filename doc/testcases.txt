@@ -96,6 +96,12 @@ A number of helper functions are available to assist with writing tests:
         - Ignore warning message
         - Similar to QTest::ignoreMessage(QtWarningMsg, msg)
 
+    wait(ms)
+        - Wait for "ms" milliseconds, processing Qt events.
+
+    sleep(ms)
+        - Sleep for "ms" milliseconds, but do not process events.
+
 The "msg" parameters can be omitted if there is no particular message
 that should be displayed other than "FAIL" or "SKIP".
 

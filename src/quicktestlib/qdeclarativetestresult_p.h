@@ -124,6 +124,9 @@ public Q_SLOTS:
 
     void ignoreWarning(const QString &message);
 
+    void wait(int ms);
+    void sleep(int ms);
+
 public:
     // Helper functions for the C++ main() shell.
     static void parseArgs(int argc, char *argv[]);

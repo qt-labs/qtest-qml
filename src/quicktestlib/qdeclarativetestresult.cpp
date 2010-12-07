@@ -41,6 +41,7 @@
 
 #include "qdeclarativetestresult_p.h"
 #include "qtestcase.h"
+#include "qtestsystem.h"
 #include "qtestresult_p.h"
 #include "qtesttable_p.h"
 #include "qtestlog_p.h"
@@ -428,6 +429,16 @@ void QDeclarativeTestResult::warn(const QString &message)
 void QDeclarativeTestResult::ignoreWarning(const QString &message)
 {
     QTestResult::ignoreMessage(QtWarningMsg, message.toLatin1().constData());
+}
+
+void QDeclarativeTestResult::wait(int ms)
+{
+    QTest::qWait(ms);
+}
+
+void QDeclarativeTestResult::sleep(int ms)
+{
+    QTest::qSleep(ms);
 }
 
 namespace QTest {
