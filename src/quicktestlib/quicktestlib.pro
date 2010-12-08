@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = QtTestQuick$${QT_LIBINFIX}
+TARGET = QtQuickTest$${QT_LIBINFIX}
 CONFIG += dll warn_on
 QT += declarative
 DESTDIR = ../../lib
@@ -38,13 +38,13 @@ HEADERS += $$PRIVATE_HEADERS
 
 include(testlib/testlib.pri)
 
-DEFINES += QT_BUILD_TEST_QUICK_LIB
+DEFINES += QT_BUILD_QUCIK_TEST_LIB
 
 !symbian {
     target.path += $$[QT_INSTALL_LIBS]
     INSTALLS += target
 
-    install_headers.path = $$[QT_INSTALL_HEADERS]/QtTestQuick
+    install_headers.path = $$[QT_INSTALL_HEADERS]/QtQuickTest
     install_headers.files = $$PUBLIC_HEADERS
     INSTALLS += install_headers
 } else {
@@ -58,7 +58,7 @@ DEFINES += QT_BUILD_TEST_QUICK_LIB
         for(entry, entries) {
             exists($$entry) {
                 contains(PUBLIC_HEADERS, $$basename(entry)) {
-                    BLD_INF_RULES.prj_exports += "$$entry $$MW_LAYER_PUBLIC_EXPORT_PATH(QtTestQuick/$$basename(entry))"
+                    BLD_INF_RULES.prj_exports += "$$entry $$MW_LAYER_PUBLIC_EXPORT_PATH(QtQuickTest/$$basename(entry))"
                 }
             }
         }

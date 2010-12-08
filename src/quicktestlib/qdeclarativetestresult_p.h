@@ -51,7 +51,7 @@ QT_BEGIN_NAMESPACE
 
 class QDeclarativeTestResultPrivate;
 
-class Q_TEST_QUICK_EXPORT QDeclarativeTestResult : public QObject
+class Q_QUICK_TEST_EXPORT QDeclarativeTestResult : public QObject
 {
     Q_OBJECT
     Q_ENUMS(FunctionType)

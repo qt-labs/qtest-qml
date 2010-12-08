@@ -52,7 +52,7 @@ QT_BEGIN_NAMESPACE
 
 typedef QWidget *(*qtest_create_viewport)();
 
-Q_TEST_QUICK_EXPORT int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport, const char *sourceDir);
+Q_QUICK_TEST_EXPORT int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport, const char *sourceDir);
 
 #ifdef QTEST_QUICK_SOURCE_DIR
 

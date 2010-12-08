@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-import Qt 4.7
-import QtTest 1.0
+import QtQuick 1.0
+import QtQuickTest 1.0
 import "testlogger.js" as TestLogger
 
 Item {
@@ -65,7 +65,7 @@ Item {
 
     // Property that is set to true when the main window is shown.
     // We need to set the property value in an odd way to handle
-    // both qmlviewer and the QtTest module test wrapper.
+    // both qmlviewer and the QtQuickTest module test wrapper.
     property bool windowShown: Qt.qtest_wrapper ? qtest.windowShown : false
 
     // Internal private state
@@ -79,14 +79,14 @@ Item {
         if (!msg)
             msg = "";
         results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
-        throw new Error("QtTest::fail")
+        throw new Error("QtQuickTest::fail")
     }
 
     function verify(cond, msg) {
         if (!msg)
             msg = "";
         if (!results.verify(cond, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
-            throw new Error("QtTest::fail")
+            throw new Error("QtQuickTest::fail")
     }
 
     function compareInternal(actual, expected) {
@@ -129,7 +129,7 @@ Item {
         if (!msg)
             msg = ""
         if (!results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
-            throw new Error("QtTest::fail")
+            throw new Error("QtQuickTest::fail")
     }
 
     function tryCompare(obj, prop, value, timeout) {
@@ -147,21 +147,21 @@ Item {
         var exp = formatValue(value)
         var success = compareInternal(actual, value)
         if (!results.compare(success, "property " + prop, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
-            throw new Error("QtTest::fail")
+            throw new Error("QtQuickTest::fail")
     }
 
     function skip(msg) {
         if (!msg)
             msg = ""
         results.skipSingle(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
-        throw new Error("QtTest::skip")
+        throw new Error("QtQuickTest::skip")
     }
 
     function skipAll(msg) {
         if (!msg)
             msg = ""
         results.skipAll(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
-        throw new Error("QtTest::skip")
+        throw new Error("QtQuickTest::skip")
     }
 
     function expectFail(tag, msg) {
@@ -170,7 +170,7 @@ Item {
         if (!msg)
             msg = ""
         if (!results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
-            throw new Error("QtTest::expectFail")
+            throw new Error("QtQuickTest::expectFail")
     }
 
     function expectFailContinue(tag, msg) {
@@ -179,7 +179,7 @@ Item {
         if (!msg)
             msg = ""
         if (!results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
-            throw new Error("QtTest::expectFail")
+            throw new Error("QtQuickTest::expectFail")
     }
 
     function warn(msg) {
@@ -213,7 +213,7 @@ Item {
             testCaseResult = testCase[prop](arg)
         } catch (e) {
             testCaseResult = []
-            if (e.message.indexOf("QtTest::") != 0) {
+            if (e.message.indexOf("QtQuickTest::") != 0) {
                 // Test threw an unrecognized exception - fail.
                 fail(e.message)
             }

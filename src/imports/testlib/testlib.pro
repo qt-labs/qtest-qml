@@ -21,8 +21,8 @@ qdeclarativesources.files += \
     TestCase.qml \
     testlogger.js
 
-qdeclarativesources.path += $$[QT_INSTALL_IMPORTS]/QtTest
-target.path += $$[QT_INSTALL_IMPORTS]/QtTest
+qdeclarativesources.path += $$[QT_INSTALL_IMPORTS]/QtQuickTest
+target.path += $$[QT_INSTALL_IMPORTS]/QtQuickTest
 INSTALLS += qdeclarativesources target
 
 include(../../quicktestlib/quicktestlib_dep.pri)

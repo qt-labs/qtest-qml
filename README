@@ -1,6 +1,6 @@
 
-QtTest module for Qt Quick
-==========================
+QtQuickTest module for Qt Quick
+===============================
 
 This directory contains an experimental module and test harness
 for writing QTestLib-style unit tests in QML.  Build it against

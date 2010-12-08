@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 import QtQuick 1.0
-import QtTest 1.0
+import QtQuickTest 1.0
 
 Button {
     id: button

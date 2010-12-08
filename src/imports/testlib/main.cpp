@@ -103,7 +103,7 @@ class QTestQmlModule : public QDeclarativeExtensionPlugin
 public:
     virtual void registerTypes(const char *uri)
     {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtTest"));
+        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuickTest"));
         qmlRegisterType<QDeclarativeTestResult>(uri,1,0,"TestResult");
     }
     void initializeEngine(QDeclarativeEngine *engine, const char *)

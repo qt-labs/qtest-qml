@@ -44,7 +44,7 @@
 
 #include <QtCore/qglobal.h>
 
-QT_LICENSED_MODULE(QtTestQuick)
+QT_LICENSED_MODULE(QtQuickTest)
 #if defined(Q_OS_WIN) || defined(Q_OS_SYMBIAN)
 #  if defined(QT_NODLL)
 #    undef QT_MAKEDLL
@@ -53,20 +53,20 @@ QT_LICENSED_MODULE(QtTestQuick)
 #    if defined(QT_DLL)
 #      undef QT_DLL
 #    endif
-#    if defined(QT_BUILD_TEST_QUICK_LIB)
-#        define Q_TEST_QUICK_EXPORT Q_DECL_EXPORT
+#    if defined(QT_BUILD_QUICK_TEST_LIB)
+#        define Q_QUICK_TEST_EXPORT Q_DECL_EXPORT
 #    else
-#        define Q_TEST_QUICK_EXPORT Q_DECL_IMPORT
+#        define Q_QUICK_TEST_EXPORT Q_DECL_IMPORT
 #    endif
 #  elif defined(QT_DLL) /* use a Qt DLL library */
-#    define Q_TEST_QUICK_EXPORT Q_DECL_IMPORT
+#    define Q_QUICK_TEST_EXPORT Q_DECL_IMPORT
 #  endif
 #endif
-#if !defined(Q_TEST_QUICK_EXPORT)
+#if !defined(Q_QUICK_TEST_EXPORT)
 #   if defined(QT_SHARED)
-#       define Q_TEST_QUICK_EXPORT Q_DECL_EXPORT
+#       define Q_QUICK_TEST_EXPORT Q_DECL_EXPORT
 #   else
-#       define Q_TEST_QUICK_EXPORT
+#       define Q_QUICK_TEST_EXPORT
 #   endif
 #endif
 

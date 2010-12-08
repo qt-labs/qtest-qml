@@ -31,7 +31,7 @@ Organization of test cases
 The test cases are launched by a C++ harness that consists of
 the following code:
 
-    #include <QtTestQuick/qdeclarativetest.h>
+    #include <QtQuickTest/qdeclarativetest.h>
     QTEST_QUICK_MAIN(qmlexample)
 
 Where "qmlexample" is an identifier to use to uniquely identify
@@ -72,8 +72,8 @@ Basic test cases
 Test cases are written as JavaScript functions within a "TestCase" element:
 
 ----------------------
-import Qt 4.7
-import QtTest 1.0
+import QtQuick 1.0
+import QtQuickTest 1.0
 
 TestCase {
     name: "MathTests"
@@ -167,8 +167,8 @@ Table data can be provided to a test using a function name that ends
 with "_data":
 
 ----------------------
-import Qt 4.7
-import QtTest 1.0
+import QtQuick 1.0
+import QtQuickTest 1.0
 
 TestCase {
     name: "DataTests"
@@ -209,8 +209,8 @@ only when a certain condition is true.  For example, the following example
 runs a test when the user presses the mouse button:
 
 ----------------------
-import Qt 4.7
-import QtTest 1.0
+import QtQuick 1.0
+import QtQuickTest 1.0
 
 Rectangle {
     id: foo
