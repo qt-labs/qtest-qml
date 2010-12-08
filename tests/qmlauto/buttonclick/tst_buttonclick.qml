@@ -47,6 +47,7 @@ Button {
     onClicked: text = "Clicked"
     TestCase {
         name: "ClickTest"
+        when: windowShown
 
         function test_click() {
             button.clicked();

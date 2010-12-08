@@ -224,3 +224,22 @@ TestCase {
     }
 }
 ----------------------
+
+The special property "windowShown" can be used to trigger a test to run
+just after the main window has been shown on-screen:
+
+----------------------
+Button {
+    id: button
+    onClicked: text = "Clicked"
+    TestCase {
+        name: "ClickTest"
+        when: windowShown
+
+        function test_click() {
+            button.clicked();
+            compare(button.text, "Clicked");
+        }
+    }
+}
+----------------------

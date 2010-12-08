@@ -41,11 +41,15 @@
 
 #include "qdeclarativetest.h"
 #include "qdeclarativetestresult_p.h"
+#include "qtestsystem.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeview.h>
 #include <QtDeclarative/qdeclarativeengine.h>
 #include <QtDeclarative/qdeclarativecontext.h>
+#include <QtScript/qscriptvalue.h>
+#include <QtScript/qscriptcontext.h>
+#include <QtScript/qscriptengine.h>
 #include <QtOpenGL/qgl.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qfileinfo.h>
@@ -59,16 +63,37 @@
 
 QT_BEGIN_NAMESPACE
 
-class QTestQuitObject : public QObject
+// Copied from qdeclarativedebughelper_p.h in Qt, to avoid a dependency
+// on a private header from Qt.
+class Q_DECLARATIVE_EXPORT QDeclarativeDebugHelper
+{
+public:
+    static QScriptEngine *getScriptEngine(QDeclarativeEngine *engine);
+    static void setAnimationSlowDownFactor(qreal factor);
+    static void enableDebugging();
+};
+
+class QTestRootObject : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool windowShown READ windowShown NOTIFY windowShownChanged)
 public:
-    QTestQuitObject(QObject *parent = 0) : QObject(parent), hasQuit(false) {}
+    QTestRootObject(QObject *parent = 0)
+        : QObject(parent), hasQuit(false), m_windowShown(false) {}
 
     bool hasQuit;
 
+    bool windowShown() const { return m_windowShown; }
+    void setWindowShown(bool value) { m_windowShown = value; emit windowShownChanged(); }
+
+Q_SIGNALS:
+    void windowShownChanged();
+
 private Q_SLOTS:
     void quit() { hasQuit = true; }
+
+private:
+    bool m_windowShown;
 };
 
 int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport, const char *sourceDir)
@@ -113,14 +138,22 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
         if (!fi.exists())
             continue;
         QDeclarativeView view;
-        QTestQuitObject quitobj;
+        QTestRootObject rootobj;
         QEventLoop eventLoop;
         QObject::connect(view.engine(), SIGNAL(quit()),
-                         &quitobj, SLOT(quit()));
+                         &rootobj, SLOT(quit()));
         QObject::connect(view.engine(), SIGNAL(quit()),
                          &eventLoop, SLOT(quit()));
         if (createViewport)
             view.setViewport((*createViewport)());
+        view.rootContext()->setContextProperty
+            (QLatin1String("qtest"), &rootobj);
+        QScriptEngine *engine;
+        engine = QDeclarativeDebugHelper::getScriptEngine(view.engine());
+        QScriptValue qtObject
+            = engine->globalObject().property(QLatin1String("Qt"));
+        qtObject.setProperty
+            (QLatin1String("qtest_wrapper"), engine->newVariant(true));
         QString path = fi.absoluteFilePath();
         if (path.startsWith(QLatin1String(":/")))
             view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
@@ -131,13 +164,16 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
             compileFail = true;
             continue;
         }
-        if (!quitobj.hasQuit) {
+        if (!rootobj.hasQuit) {
             // If the test already quit, then it was performed
             // synchronously during setSource().  Otherwise it is
             // an asynchronous test and we need to show the window
             // and wait for the quit indication.
             view.show();
-            eventLoop.exec();
+            QTest::qWaitForWindowShown(&view);
+            rootobj.setWindowShown(true);
+            if (!rootobj.hasQuit)
+                eventLoop.exec();
         }
     }
 
