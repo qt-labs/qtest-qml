@@ -113,7 +113,7 @@ Item {
                     tag: "local not found",
                     source: "no-such-file.png",
                     remote: false,
-                    error: "qrc:data/inline:1:21: QML BorderImage: Cannot open: qrc:data/no-such-file.png"
+                    error: "SUBinline:1:21: QML BorderImage: Cannot open: SUBno-such-file.png"
                 }
                 // TODO: remote tests that need to use http
             ]
@@ -121,8 +121,10 @@ Item {
 
         function test_imageSource(row) {
             var expectError = (row.error.length != 0)
-            if (expectError)
-                ignoreWarning(row.error)
+            if (expectError) {
+                var parentUrl = Qt.resolvedUrl(".")
+                ignoreWarning(row.error.replace(/SUB/g, parentUrl))
+            }
 
             var img = Qt.createQmlObject
                 ('import QtQuick 1.0; BorderImage { source: "' +
@@ -145,7 +147,7 @@ Item {
         }
 
         function test_clearSource() {
-            compare(clearSource.source, "qrc:data/colors.png")
+            compare(clearSource.source, Qt.resolvedUrl("colors.png"))
             compare(clearSource.width, 120)
             compare(clearSource.height, 120)
 
@@ -187,14 +189,12 @@ Item {
                 {
                     tag: "local",
                     source: "colors-round.sci",
-                    sourceUrl: "qrc:data/colors-round.sci",
                     remote: false,
                     valid: true
                 },
                 {
                     tag: "local not found",
                     source: "no-such-file.sci",
-                    sourceUrl: "qrc:data/no-such-file.sci",
                     remote: false,
                     valid: false
                 }
@@ -210,7 +210,7 @@ Item {
             if (row.remote)
                 tryCompare(img, "status", BorderImage.Loading)
 
-            compare(img.source, row.sourceUrl)
+            compare(img.source, Qt.resolvedUrl(row.source))
             compare(img.width, 300)
             compare(img.height, 300)
 

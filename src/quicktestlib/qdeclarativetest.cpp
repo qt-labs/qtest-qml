@@ -71,13 +71,15 @@ private Q_SLOTS:
     void quit() { hasQuit = true; }
 };
 
-int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport)
+int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport, const char *sourceDir)
 {
     QApplication app(argc, argv);
 
     // Determine where to look for the test data.  If QTEST_QUICK_SOURCE_DIR
     // is set, then use that.  Otherwise scan the application's resources.
     QString testPath = QString::fromLocal8Bit(qgetenv("QTEST_QUICK_SOURCE_DIR"));
+    if (testPath.isEmpty() && sourceDir)
+        testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())
         testPath = QLatin1String(":/");
 

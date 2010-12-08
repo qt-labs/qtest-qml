@@ -41,4 +41,4 @@
 
 #include "qdeclarativetest.h"
 
-QTEST_QUICK_MAIN(qdeclarativeborderimage)
+QTEST_QUICK_MAIN(qmlauto)
