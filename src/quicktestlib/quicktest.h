@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDECLARATIVETEST_H
-#define QDECLARATIVETEST_H
+#ifndef QUICKTEST_H
+#define QUICKTEST_H
 
 #include "quicktestglobal.h"
 #include <QtGui/qwidget.h>

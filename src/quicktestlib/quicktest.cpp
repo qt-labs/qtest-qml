@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#include "qdeclarativetest.h"
-#include "qdeclarativetestresult_p.h"
+#include "quicktest.h"
+#include "quicktestresult_p.h"
 #include "qtestsystem.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>
@@ -127,8 +127,8 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
     }
 
     // Parse the command-line arguments.
-    QDeclarativeTestResult::parseArgs(argc, argv);
-    QDeclarativeTestResult::setProgramName(name);
+    QuickTestResult::parseArgs(argc, argv);
+    QuickTestResult::setProgramName(name);
 
     // Scan through all of the "tst_*.qml" files and run each of them
     // in turn with a QDeclarativeView.
@@ -178,10 +178,10 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
     }
 
     // Flush the current logging stream.
-    QDeclarativeTestResult::setProgramName(0);
+    QuickTestResult::setProgramName(0);
 
     // Return the number of failures as the exit code.
-    int code = QDeclarativeTestResult::exitCode();
+    int code = QuickTestResult::exitCode();
     if (!code && compileFail)
         ++code;
     return code;
@@ -189,4 +189,4 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
 
 QT_END_NAMESPACE
 
-#include "qdeclarativetest.moc"
+#include "quicktest.moc"

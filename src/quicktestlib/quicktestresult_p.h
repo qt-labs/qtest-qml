@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#ifndef QDECLARATIVETESTRESULT_P_H
-#define QDECLARATIVETESTRESULT_P_H
+#ifndef QUICKTESTRESULT_P_H
+#define QUICKTESTRESULT_P_H
 
 #include "quicktestglobal.h"
 #include <QtCore/qobject.h>
@@ -49,9 +49,9 @@
 
 QT_BEGIN_NAMESPACE
 
-class QDeclarativeTestResultPrivate;
+class QuickTestResultPrivate;
 
-class Q_QUICK_TEST_EXPORT QDeclarativeTestResult : public QObject
+class Q_QUICK_TEST_EXPORT QuickTestResult : public QObject
 {
     Q_OBJECT
     Q_ENUMS(FunctionType)
@@ -66,8 +66,8 @@ class Q_QUICK_TEST_EXPORT QDeclarativeTestResult : public QObject
     Q_PROPERTY(int failCount READ failCount)
     Q_PROPERTY(int skipCount READ skipCount)
 public:
-    QDeclarativeTestResult(QObject *parent = 0);
-    ~QDeclarativeTestResult();
+    QuickTestResult(QObject *parent = 0);
+    ~QuickTestResult();
 
     // Values must match QTestResult::TestLocation.
     enum FunctionType
@@ -146,10 +146,10 @@ Q_SIGNALS:
     void skippedChanged();
 
 private:
-    QScopedPointer<QDeclarativeTestResultPrivate> d_ptr;
+    QScopedPointer<QuickTestResultPrivate> d_ptr;
 
-    Q_DECLARE_PRIVATE(QDeclarativeTestResult)
-    Q_DISABLE_COPY(QDeclarativeTestResult)
+    Q_DECLARE_PRIVATE(QuickTestResult)
+    Q_DISABLE_COPY(QuickTestResult)
 };
 
 QT_END_NAMESPACE

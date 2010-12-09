@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include "qdeclarativetestresult_p.h"
+#include "quicktestresult_p.h"
 #include "qtestcase.h"
 #include "qtestsystem.h"
 #include "qtestresult_p.h"
@@ -55,14 +55,14 @@ QT_BEGIN_NAMESPACE
 static const char *globalProgramName = 0;
 static bool loggingStarted = false;
 
-class QDeclarativeTestResultPrivate
+class QuickTestResultPrivate
 {
 public:
-    QDeclarativeTestResultPrivate()
+    QuickTestResultPrivate()
         : table(0)
     {
     }
-    ~QDeclarativeTestResultPrivate()
+    ~QuickTestResultPrivate()
     {
         delete table;
     }
@@ -76,13 +76,13 @@ public:
     QTestTable *table;
 };
 
-QByteArray QDeclarativeTestResultPrivate::intern(const QString &str)
+QByteArray QuickTestResultPrivate::intern(const QString &str)
 {
     QByteArray bstr = str.toUtf8();
     return *(internedStrings.insert(bstr));
 }
 
-void QDeclarativeTestResultPrivate::updateTestObjectName()
+void QuickTestResultPrivate::updateTestObjectName()
 {
     // In plain logging mode we use the TestCase name as the
     // class name so that multiple TestCase elements will report
@@ -101,12 +101,12 @@ void QDeclarativeTestResultPrivate::updateTestObjectName()
     }
 }
 
-QDeclarativeTestResult::QDeclarativeTestResult(QObject *parent)
-    : QObject(parent), d_ptr(new QDeclarativeTestResultPrivate)
+QuickTestResult::QuickTestResult(QObject *parent)
+    : QObject(parent), d_ptr(new QuickTestResultPrivate)
 {
 }
 
-QDeclarativeTestResult::~QDeclarativeTestResult()
+QuickTestResult::~QuickTestResult()
 {
 }
 
@@ -118,15 +118,15 @@ QDeclarativeTestResult::~QDeclarativeTestResult()
 
     \sa functionName
 */
-QString QDeclarativeTestResult::testCaseName() const
+QString QuickTestResult::testCaseName() const
 {
-    Q_D(const QDeclarativeTestResult);
+    Q_D(const QuickTestResult);
     return d->testCaseName;
 }
 
-void QDeclarativeTestResult::setTestCaseName(const QString &name)
+void QuickTestResult::setTestCaseName(const QString &name)
 {
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     d->testCaseName = name;
     d->updateTestObjectName();
     emit testCaseNameChanged();
@@ -141,15 +141,15 @@ void QDeclarativeTestResult::setTestCaseName(const QString &name)
 
     \sa testCaseName
 */
-QString QDeclarativeTestResult::functionName() const
+QString QuickTestResult::functionName() const
 {
-    Q_D(const QDeclarativeTestResult);
+    Q_D(const QuickTestResult);
     return d->functionName;
 }
 
-void QDeclarativeTestResult::setFunctionName(const QString &name)
+void QuickTestResult::setFunctionName(const QString &name)
 {
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     if (!name.isEmpty()) {
         // In plain logging mode, we use the function name directly.
         // In XML logging mode, we use "testCase__functionName" as the
@@ -169,12 +169,12 @@ void QDeclarativeTestResult::setFunctionName(const QString &name)
     emit functionNameChanged();
 }
 
-QDeclarativeTestResult::FunctionType QDeclarativeTestResult::functionType() const
+QuickTestResult::FunctionType QuickTestResult::functionType() const
 {
     return FunctionType(QTestResult::currentTestLocation());
 }
 
-void QDeclarativeTestResult::setFunctionType(FunctionType type)
+void QuickTestResult::setFunctionType(FunctionType type)
 {
     QTestResult::setCurrentTestLocation(QTestResult::TestLocation(type));
     emit functionTypeChanged();
@@ -186,7 +186,7 @@ void QDeclarativeTestResult::setFunctionType(FunctionType type)
     This property defines the tag for the current row in a
     data-driven test, or an empty string if not a data-driven test.
 */
-QString QDeclarativeTestResult::dataTag() const
+QString QuickTestResult::dataTag() const
 {
     const char *tag = QTestResult::currentDataTag();
     if (tag)
@@ -195,7 +195,7 @@ QString QDeclarativeTestResult::dataTag() const
         return QString();
 }
 
-void QDeclarativeTestResult::setDataTag(const QString &tag)
+void QuickTestResult::setDataTag(const QString &tag)
 {
     if (!tag.isEmpty()) {
         QTestData *data = &(QTest::newRow(tag.toUtf8().constData()));
@@ -215,7 +215,7 @@ void QDeclarativeTestResult::setDataTag(const QString &tag)
 
     \sa skipped, dataFailed
 */
-bool QDeclarativeTestResult::isFailed() const
+bool QuickTestResult::isFailed() const
 {
     return QTestResult::testFailed();
 }
@@ -229,7 +229,7 @@ bool QDeclarativeTestResult::isFailed() const
 
     \sa failed
 */
-bool QDeclarativeTestResult::isDataFailed() const
+bool QuickTestResult::isDataFailed() const
 {
     return QTestResult::currentTestFailed();
 }
@@ -242,12 +242,12 @@ bool QDeclarativeTestResult::isDataFailed() const
 
     \sa failed
 */
-bool QDeclarativeTestResult::isSkipped() const
+bool QuickTestResult::isSkipped() const
 {
     return QTestResult::skipCurrentTest();
 }
 
-void QDeclarativeTestResult::setSkipped(bool skip)
+void QuickTestResult::setSkipped(bool skip)
 {
     QTestResult::setSkipCurrentTest(skip);
     emit skippedChanged();
@@ -260,7 +260,7 @@ void QDeclarativeTestResult::setSkipped(bool skip)
 
     \sa failCount, skipCount
 */
-int QDeclarativeTestResult::passCount() const
+int QuickTestResult::passCount() const
 {
     return QTestResult::passCount();
 }
@@ -272,7 +272,7 @@ int QDeclarativeTestResult::passCount() const
 
     \sa passCount, skipCount
 */
-int QDeclarativeTestResult::failCount() const
+int QuickTestResult::failCount() const
 {
     return QTestResult::failCount();
 }
@@ -284,7 +284,7 @@ int QDeclarativeTestResult::failCount() const
 
     \sa passCount, failCount
 */
-int QDeclarativeTestResult::skipCount() const
+int QuickTestResult::skipCount() const
 {
     return QTestResult::skipCount();
 }
@@ -294,7 +294,7 @@ int QDeclarativeTestResult::skipCount() const
 
     Resets all pass/fail/skip counters and prepare for testing.
 */
-void QDeclarativeTestResult::reset()
+void QuickTestResult::reset()
 {
     if (!globalProgramName)     // Only if run via qmlviewer.
         QTestResult::reset();
@@ -308,11 +308,11 @@ void QDeclarativeTestResult::reset()
 
     \sa stopLogging()
 */
-void QDeclarativeTestResult::startLogging()
+void QuickTestResult::startLogging()
 {
     // The program name is used for logging headers and footers if it
     // is set.  Otherwise the test case name is used.
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     if (loggingStarted)
         return;
     const char *saved = QTestResult::currentTestObjectName();
@@ -334,9 +334,9 @@ void QDeclarativeTestResult::startLogging()
 
     \sa startLogging()
 */
-void QDeclarativeTestResult::stopLogging()
+void QuickTestResult::stopLogging()
 {
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     if (globalProgramName)
         return;     // Logging will be stopped by setProgramName(0).
     const char *saved = QTestResult::currentTestObjectName();
@@ -345,33 +345,33 @@ void QDeclarativeTestResult::stopLogging()
     QTestResult::setCurrentTestObject(saved);
 }
 
-void QDeclarativeTestResult::initTestTable()
+void QuickTestResult::initTestTable()
 {
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     delete d->table;
     d->table = new QTestTable;
 }
 
-void QDeclarativeTestResult::clearTestTable()
+void QuickTestResult::clearTestTable()
 {
-    Q_D(QDeclarativeTestResult);
+    Q_D(QuickTestResult);
     delete d->table;
     d->table = 0;
 }
 
-void QDeclarativeTestResult::finishTestFunction()
+void QuickTestResult::finishTestFunction()
 {
     QTestResult::finishedCurrentTestFunction();
 }
 
-void QDeclarativeTestResult::fail
+void QuickTestResult::fail
     (const QString &message, const QString &file, int line)
 {
     QTestResult::addFailure(message.toLatin1().constData(),
                             file.toLatin1().constData(), line);
 }
 
-bool QDeclarativeTestResult::verify
+bool QuickTestResult::verify
     (bool success, const QString &message, const QString &file, int line)
 {
     if (message.isEmpty()) {
@@ -384,7 +384,7 @@ bool QDeclarativeTestResult::verify
     }
 }
 
-bool QDeclarativeTestResult::compare
+bool QuickTestResult::compare
     (bool success, const QString &message,
      const QString &val1, const QString &val2,
      const QString &file, int line)
@@ -397,14 +397,14 @@ bool QDeclarativeTestResult::compare
          file.toLatin1().constData(), line);
 }
 
-void QDeclarativeTestResult::skipSingle
+void QuickTestResult::skipSingle
     (const QString &message, const QString &file, int line)
 {
     QTestResult::addSkip(message.toLatin1().constData(),
                          QTest::SkipSingle, file.toLatin1().constData(), line);
 }
 
-void QDeclarativeTestResult::skipAll
+void QuickTestResult::skipAll
     (const QString &message, const QString &file, int line)
 {
     QTestResult::addSkip(message.toLatin1().constData(),
@@ -412,7 +412,7 @@ void QDeclarativeTestResult::skipAll
     QTestResult::setSkipCurrentTest(true);
 }
 
-bool QDeclarativeTestResult::expectFail
+bool QuickTestResult::expectFail
     (const QString &tag, const QString &comment, const QString &file, int line)
 {
     return QTestResult::expectFail
@@ -421,7 +421,7 @@ bool QDeclarativeTestResult::expectFail
          QTest::Abort, file.toLatin1().constData(), line);
 }
 
-bool QDeclarativeTestResult::expectFailContinue
+bool QuickTestResult::expectFailContinue
     (const QString &tag, const QString &comment, const QString &file, int line)
 {
     return QTestResult::expectFail
@@ -430,22 +430,22 @@ bool QDeclarativeTestResult::expectFailContinue
          QTest::Continue, file.toLatin1().constData(), line);
 }
 
-void QDeclarativeTestResult::warn(const QString &message)
+void QuickTestResult::warn(const QString &message)
 {
     QTestLog::warn(message.toLatin1().constData());
 }
 
-void QDeclarativeTestResult::ignoreWarning(const QString &message)
+void QuickTestResult::ignoreWarning(const QString &message)
 {
     QTestResult::ignoreMessage(QtWarningMsg, message.toLatin1().constData());
 }
 
-void QDeclarativeTestResult::wait(int ms)
+void QuickTestResult::wait(int ms)
 {
     QTest::qWait(ms);
 }
 
-void QDeclarativeTestResult::sleep(int ms)
+void QuickTestResult::sleep(int ms)
 {
     QTest::qSleep(ms);
 }
@@ -454,12 +454,12 @@ namespace QTest {
     void qtest_qParseArgs(int argc, char *argv[]);
 };
 
-void QDeclarativeTestResult::parseArgs(int argc, char *argv[])
+void QuickTestResult::parseArgs(int argc, char *argv[])
 {
     QTest::qtest_qParseArgs(argc, argv);
 }
 
-void QDeclarativeTestResult::setProgramName(const char *name)
+void QuickTestResult::setProgramName(const char *name)
 {
     if (name) {
         QTestResult::reset();
@@ -471,7 +471,7 @@ void QDeclarativeTestResult::setProgramName(const char *name)
     globalProgramName = name;
 }
 
-int QDeclarativeTestResult::exitCode()
+int QuickTestResult::exitCode()
 {
 #if defined(QTEST_NOEXITCODE)
     return 0;
