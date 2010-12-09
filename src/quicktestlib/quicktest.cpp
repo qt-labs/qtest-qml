@@ -96,13 +96,13 @@ private:
     bool m_windowShown;
 };
 
-int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewport createViewport, const char *sourceDir)
+int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport_create createViewport, const char *sourceDir)
 {
     QApplication app(argc, argv);
 
-    // Determine where to look for the test data.  If QTEST_QUICK_SOURCE_DIR
+    // Determine where to look for the test data.  If QUICK_TEST_SOURCE_DIR
     // is set, then use that.  Otherwise scan the application's resources.
-    QString testPath = QString::fromLocal8Bit(qgetenv("QTEST_QUICK_SOURCE_DIR"));
+    QString testPath = QString::fromLocal8Bit(qgetenv("QUICK_TEST_SOURCE_DIR"));
     if (testPath.isEmpty() && sourceDir)
         testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())

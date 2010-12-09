@@ -32,7 +32,7 @@ The test cases are launched by a C++ harness that consists of
 the following code:
 
     #include <QtQuickTest/quicktest.h>
-    QTEST_QUICK_MAIN(qmlexample)
+    QUICK_TEST_MAIN(qmlexample)
 
 Where "qmlexample" is an identifier to use to uniquely identify
 this set of tests.  You should add "CONFIG += qmltestcase" to your
@@ -55,13 +55,13 @@ is an example .qrc file:
     </qresource>
     </RCC>
 
-The QTEST_QUICK_SOURCE_DIR macro can be defined at compile time to
+The QUICK_TEST_SOURCE_DIR macro can be defined at compile time to
 run tests from plain files without binding them into resources.
 Modify your .pro file to include the following line:
 
-    DEFINES += QTEST_QUICK_SOURCE_DIR=\"\\\"$$PWD\\\"\"
+    DEFINES += QUICK_TEST_SOURCE_DIR=\"\\\"$$PWD\\\"\"
 
-The QTEST_QUICK_SOURCE_DIR environment variable can also be set
+The QUICK_TEST_SOURCE_DIR environment variable can also be set
 at runtime to run test cases from a different directory.  This may
 be needed to run tests on a target device where the compiled-in
 directory name refers to a host.
@@ -71,7 +71,7 @@ used by the test.
 
 See "tests/qmlexample" for an example of creating a test harness
 that uses resources and "tests/qmlauto" for an example that uses
-the QTEST_QUICK_SOURCE_DIR macro.
+the QUICK_TEST_SOURCE_DIR macro.
 
 Basic test cases
 ================
