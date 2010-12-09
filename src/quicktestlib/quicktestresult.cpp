@@ -45,26 +45,35 @@
 #include "qtestresult_p.h"
 #include "qtesttable_p.h"
 #include "qtestlog_p.h"
+#include "qbenchmark.h"
+#include "qbenchmark_p.h"
 #include <QtCore/qset.h>
 #include <QtCore/qmap.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qcoreapplication.h>
+#include <QtCore/qdebug.h>
 
 QT_BEGIN_NAMESPACE
 
 static const char *globalProgramName = 0;
 static bool loggingStarted = false;
+static QBenchmarkGlobalData globalBenchmarkData;
 
 class QuickTestResultPrivate
 {
 public:
     QuickTestResultPrivate()
         : table(0)
+        , benchmarkIter(0)
+        , benchmarkData(0)
+        , iterCount(0)
     {
     }
     ~QuickTestResultPrivate()
     {
         delete table;
+        delete benchmarkIter;
+        delete benchmarkData;
     }
 
     QByteArray intern(const QString &str);
@@ -74,6 +83,10 @@ public:
     QString functionName;
     QSet<QByteArray> internedStrings;
     QTestTable *table;
+    QTest::QBenchmarkIterationController *benchmarkIter;
+    QBenchmarkTestMethodData *benchmarkData;
+    int iterCount;
+    QList<QBenchmarkResult> results;
 };
 
 QByteArray QuickTestResultPrivate::intern(const QString &str)
@@ -104,6 +117,8 @@ void QuickTestResultPrivate::updateTestObjectName()
 QuickTestResult::QuickTestResult(QObject *parent)
     : QObject(parent), d_ptr(new QuickTestResultPrivate)
 {
+    if (!QBenchmarkGlobalData::current)
+        QBenchmarkGlobalData::current = &globalBenchmarkData;
 }
 
 QuickTestResult::~QuickTestResult()
@@ -166,6 +181,7 @@ void QuickTestResult::setFunctionName(const QString &name)
     } else {
         QTestResult::setCurrentTestFunction(0);
     }
+    d->functionName = name;
     emit functionNameChanged();
 }
 
@@ -450,12 +466,115 @@ void QuickTestResult::sleep(int ms)
     QTest::qSleep(ms);
 }
 
+void QuickTestResult::startMeasurement()
+{
+    Q_D(QuickTestResult);
+    delete d->benchmarkData;
+    d->benchmarkData = new QBenchmarkTestMethodData();
+    QBenchmarkTestMethodData::current = d->benchmarkData;
+    d->iterCount = (QBenchmarkGlobalData::current->measurer->needsWarmupIteration()) ? -1 : 0;
+    d->results.clear();
+}
+
+void QuickTestResult::beginDataRun()
+{
+    QBenchmarkTestMethodData::current->beginDataRun();
+}
+
+void QuickTestResult::endDataRun()
+{
+    Q_D(QuickTestResult);
+    QBenchmarkTestMethodData::current->endDataRun();
+    if (d->iterCount > -1)  // iteration -1 is the warmup iteration.
+        d->results.append(QBenchmarkTestMethodData::current->result);
+
+    if (QBenchmarkGlobalData::current->verboseOutput) {
+        if (d->iterCount == -1) {
+            qDebug() << "warmup stage result      :" << QBenchmarkTestMethodData::current->result.value;
+        } else {
+            qDebug() << "accumulation stage result:" << QBenchmarkTestMethodData::current->result.value;
+        }
+    }
+}
+
+bool QuickTestResult::measurementAccepted()
+{
+    return QBenchmarkTestMethodData::current->resultsAccepted();
+}
+
+static QBenchmarkResult qMedian(const QList<QBenchmarkResult> &container)
+{
+    const int count = container.count();
+    if (count == 0)
+        return QBenchmarkResult();
+
+    if (count == 1)
+        return container.at(0);
+
+    QList<QBenchmarkResult> containerCopy = container;
+    qSort(containerCopy);
+
+    const int middle = count / 2;
+
+    // ### handle even-sized containers here by doing an aritmetic mean of the two middle items.
+    return containerCopy.at(middle);
+}
+
+bool QuickTestResult::needsMoreMeasurements()
+{
+    Q_D(QuickTestResult);
+    ++(d->iterCount);
+    if (d->iterCount < QBenchmarkGlobalData::current->adjustMedianIterationCount())
+        return true;
+    if (QBenchmarkTestMethodData::current->resultsAccepted())
+        QTestLog::addBenchmarkResult(qMedian(d->results));
+    return false;
+}
+
+void QuickTestResult::startBenchmark(RunMode runMode, const QString &tag)
+{
+    QBenchmarkTestMethodData::current->result = QBenchmarkResult();
+    QBenchmarkTestMethodData::current->resultAccepted = false;
+    QBenchmarkGlobalData::current->context.tag = tag;
+    QBenchmarkGlobalData::current->context.slotName = functionName();
+
+    Q_D(QuickTestResult);
+    delete d->benchmarkIter;
+    d->benchmarkIter = new QTest::QBenchmarkIterationController
+        (QTest::QBenchmarkIterationController::RunMode(runMode));
+}
+
+bool QuickTestResult::isBenchmarkDone() const
+{
+    Q_D(const QuickTestResult);
+    if (d->benchmarkIter)
+        return d->benchmarkIter->isDone();
+    else
+        return true;
+}
+
+void QuickTestResult::nextBenchmark()
+{
+    Q_D(QuickTestResult);
+    if (d->benchmarkIter)
+        d->benchmarkIter->next();
+}
+
+void QuickTestResult::stopBenchmark()
+{
+    Q_D(QuickTestResult);
+    delete d->benchmarkIter;
+    d->benchmarkIter = 0;
+}
+
 namespace QTest {
     void qtest_qParseArgs(int argc, char *argv[]);
 };
 
 void QuickTestResult::parseArgs(int argc, char *argv[])
 {
+    if (!QBenchmarkGlobalData::current)
+        QBenchmarkGlobalData::current = &globalBenchmarkData;
     QTest::qtest_qParseArgs(argc, argv);
 }
 

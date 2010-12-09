@@ -276,3 +276,32 @@ Button {
     }
 }
 ----------------------
+
+Benchmarks
+==========
+
+If the test function name starts with "benchmark_", then it will be
+run multiple times with the Qt benchmark framework, with a average
+timing value reported for the runs.  This is equivalent to using the
+QBENCHMARK macro in QTestLib.
+
+----------------------
+TestCase {
+    id: top
+    name: "CreateBenchmark"
+
+    function benchmark_create_component() {
+        var component = Qt.createComponent("item.qml")
+        var obj = component.createObject(top)
+        obj.destroy()
+        component.destroy()
+    }
+}
+----------------------
+
+RESULT : CreateBenchmark::benchmark_create_component:
+     0.23 msecs per iteration (total: 60, iterations: 256)
+PASS   : CreateBenchmark::benchmark_create_component()
+
+To get the effect of the QBENCHMARK_ONCE macro, prefix the test
+function name with "benchmark_once_".

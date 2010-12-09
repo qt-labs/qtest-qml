@@ -233,6 +233,39 @@ Item {
         results.functionType = TestResult.NoWhere
     }
 
+    function runBenchmarkFunction(prop, arg) {
+        results.startMeasurement()
+        do {
+            results.beginDataRun()
+            do {
+                // Run the initialization function.
+                results.functionType = TestResult.InitFunc
+                runInternal("init")
+                if (results.skipped)
+                    break
+
+                // Execute the benchmark function.
+                results.functionType = TestResult.Func
+                if (prop.indexOf("benchmark_once_") != 0)
+                    results.startBenchmark(TestResult.RepeatUntilValidMeasurement, results.dataTag)
+                else
+                    results.startBenchmark(TestResult.RunOnce, results.dataTag)
+                while (!results.isBenchmarkDone()) {
+                    if (!runInternal(prop, arg))
+                        break
+                    results.nextBenchmark()
+                }
+                results.stopBenchmark()
+
+                // Run the cleanup function.
+                results.functionType = TestResult.CleanupFunc
+                runInternal("cleanup")
+                results.functionType = TestResult.NoWhere
+            } while (!results.measurementAccepted())
+            results.endDataRun()
+        } while (results.needsMoreMeasurements())
+    }
+
     function run() {
         if (TestLogger.log_start_test()) {
             results.reset()
@@ -255,7 +288,7 @@ Item {
         var testList = []
         if (runTests) {
             for (var prop in testCase) {
-                if (prop.indexOf("test_") != 0)
+                if (prop.indexOf("test_") != 0 && prop.indexOf("benchmark_") != 0)
                     continue
                 var tail = prop.lastIndexOf("_data");
                 if (tail != -1 && tail == (prop.length - 5))
@@ -267,6 +300,7 @@ Item {
         for (var index in testList) {
             var prop = testList[index]
             var datafunc = prop + "_data"
+            var isBenchmark = (prop.indexOf("benchmark_") == 0)
             results.functionName = prop
             if (datafunc in testCase) {
                 results.functionType = TestResult.DataFunc
@@ -280,15 +314,20 @@ Item {
                         if (!row.tag)
                             row.tag = "row " + index    // Must have something
                         results.dataTag = row.tag
-                        runFunction(prop, row)
+                        if (isBenchmark)
+                            runBenchmarkFunction(prop, row)
+                        else
+                            runFunction(prop, row)
                         results.dataTag = ""
                     }
                     if (!haveData)
                         results.warn("no data supplied for " + prop + "() by " + datafunc + "()")
                     results.clearTestTable()
                 }
+            } else if (isBenchmark) {
+                runBenchmarkFunction(prop, null, isBenchmark)
             } else {
-                runFunction(prop)
+                runFunction(prop, null, isBenchmark)
             }
             results.finishTestFunction()
             results.skipped = false
