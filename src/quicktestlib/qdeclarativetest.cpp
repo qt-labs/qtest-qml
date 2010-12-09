@@ -121,7 +121,7 @@ int qtest_quick_main(int argc, char **argv, const char *name, qtest_create_viewp
 
     // Bail out if we didn't find any test cases.
     if (files.isEmpty()) {
-        qWarning() << argv[1] << ": could not find any test cases under"
+        qWarning() << argv[0] << ": could not find any test cases under"
                    << testPath;
         return 1;
     }
