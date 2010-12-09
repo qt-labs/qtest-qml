@@ -31,7 +31,7 @@ Organization of test cases
 The test cases are launched by a C++ harness that consists of
 the following code:
 
-    #include <QtQuickTest/qdeclarativetest.h>
+    #include <QtQuickTest/quicktest.h>
     QTEST_QUICK_MAIN(qmlexample)
 
 Where "qmlexample" is an identifier to use to uniquely identify

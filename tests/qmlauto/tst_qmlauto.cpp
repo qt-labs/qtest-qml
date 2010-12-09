@@ -39,6 +39,5 @@
 **
 ****************************************************************************/
 
-#include "quicktest.h"
-
+#include <QtQuickTest/quicktest.h>
 QTEST_QUICK_MAIN(qmlauto)

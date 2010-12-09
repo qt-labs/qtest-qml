@@ -24,12 +24,14 @@ symbian {
     }
 }
 
+INCLUDEPATH += $$PWD/QtQuickTest
+
 SOURCES += \
     quicktest.cpp \
     quicktestresult.cpp
 HEADERS += \
-    quicktestglobal.h \
-    quicktest.h
+    QtQuickTest/quicktestglobal.h \
+    QtQuickTest/quicktest.h
 PRIVATE_HEADERS += \
     quicktestresult_p.h
 

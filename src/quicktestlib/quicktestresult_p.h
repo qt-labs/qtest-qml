@@ -42,7 +42,7 @@
 #ifndef QUICKTESTRESULT_P_H
 #define QUICKTESTRESULT_P_H
 
-#include "quicktestglobal.h"
+#include <QtQuickTest/quicktestglobal.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qscopedpointer.h>
