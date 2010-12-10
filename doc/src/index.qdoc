@@ -59,7 +59,9 @@
 
     \section1 Building QtQuickTest
 
-    Build QtQuickTest against Qt 4.7 as follows:
+    The QtQuickTest source code can be obtained from
+    \l{http://qt.gitorious.org/qt-labs/qtest-qml}{http://qt.gitorious.org/qt-labs/qtest-qml}
+    and then built against Qt 4.7 as follows:
 
     \code
     $ /path/to/qt/bin/qmake qtest-qml.pro
