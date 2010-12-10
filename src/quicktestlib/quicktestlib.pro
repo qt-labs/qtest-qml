@@ -24,6 +24,7 @@ symbian {
 }
 
 INCLUDEPATH += $$PWD/QtQuickTest
+INCLUDEPATH += $$PWD
 
 SOURCES += \
     quicktest.cpp \
