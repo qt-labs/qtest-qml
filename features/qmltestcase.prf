@@ -15,3 +15,10 @@ win32:CONFIG(debug, debug|release) {
 } else {
     LIBS += -lQtQuickTest$${QT_LIBINFIX}
 }
+
+# If the .pro file specified an IMPORTPATH, then add that to
+# the command-line when the test is run.
+!isEmpty(IMPORTPATH) {
+    load(testcase)
+    for(import, IMPORTPATH): check.commands += -import \"$$import\"
+}

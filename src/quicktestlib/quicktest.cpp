@@ -96,13 +96,46 @@ private:
     bool m_windowShown;
 };
 
+static inline QString stripQuotes(const QString &s)
+{
+    if (s.length() >= 2 && s.startsWith(QLatin1Char('"')) && s.endsWith(QLatin1Char('"')))
+        return s.mid(1, s.length() - 2);
+    else
+        return s;
+}
+
 int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport_create createViewport, const char *sourceDir)
 {
     QApplication app(argc, argv);
 
+    // Look for QML-specific command-line options.
+    //      -import dir         Specify an import directory.
+    //      -input dir          Specify the input directory for test cases.
+    QStringList imports;
+    QString testPath;
+    int outargc = 1;
+    int index = 1;
+    while (index < argc) {
+        if (strcmp(argv[index], "-import") == 0 && (index + 1) < argc) {
+            imports += stripQuotes(QString::fromLocal8Bit(argv[index + 1]));
+            index += 2;
+        } else if (strcmp(argv[index], "-input") == 0 && (index + 1) < argc) {
+            testPath = stripQuotes(QString::fromLocal8Bit(argv[index + 1]));
+            index += 2;
+        } else if (outargc != index) {
+            argv[outargc++] = argv[index++];
+        } else {
+            ++outargc;
+            ++index;
+        }
+    }
+    argv[outargc] = 0;
+    argc = outargc;
+
     // Determine where to look for the test data.  If QUICK_TEST_SOURCE_DIR
     // is set, then use that.  Otherwise scan the application's resources.
-    QString testPath = QString::fromLocal8Bit(qgetenv("QUICK_TEST_SOURCE_DIR"));
+    if (testPath.isEmpty())
+        testPath = QString::fromLocal8Bit(qgetenv("QUICK_TEST_SOURCE_DIR"));
     if (testPath.isEmpty() && sourceDir)
         testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())
@@ -154,6 +187,8 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
             = engine->globalObject().property(QLatin1String("Qt"));
         qtObject.setProperty
             (QLatin1String("qtest_wrapper"), engine->newVariant(true));
+        foreach (QString path, imports)
+            view.engine()->addImportPath(path);
         QString path = fi.absoluteFilePath();
         if (path.startsWith(QLatin1String(":/")))
             view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
