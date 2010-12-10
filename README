@@ -19,4 +19,4 @@ Also see "doc/testcases.txt" for an introduction to writing unit tests.
 
 You can also run "make check" to verify that the example tests pass
 correctly, and "make docs" to generate the HTML documentation under
-\c{doc/html}.
+"doc/html".
