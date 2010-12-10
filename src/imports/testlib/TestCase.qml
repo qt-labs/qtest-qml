@@ -68,28 +68,27 @@ Item {
     // both qmlviewer and the QtQuickTest module test wrapper.
     property bool windowShown: Qt.qtest_wrapper ? qtest.windowShown : false
 
-    // Internal private state
-    property bool prevWhen: true
-    property int testId: -1
-    property variant testCaseResult
-
-    TestResult { id: results }
+    // Internal private state.  Identifiers prefixed with qtest are reserved.
+    property bool qtest_prevWhen: true
+    property int qtest_testId: -1
+    property variant qtest_testCaseResult
+    TestResult { id: qtest_results }
 
     function fail(msg) {
         if (!msg)
             msg = "";
-        results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
+        qtest_results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::fail")
     }
 
     function verify(cond, msg) {
         if (!msg)
             msg = "";
-        if (!results.verify(cond, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+        if (!qtest_results.verify(cond, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
     }
 
-    function compareInternal(actual, expected) {
+    function qtest_compareInternal(actual, expected) {
         var success = false
         if (typeof actual == "number" && typeof expected == "number") {
             // Use a fuzzy compare if the two values are floats
@@ -112,7 +111,7 @@ Item {
         return success
     }
 
-    function formatValue(value) {
+    function qtest_formatValue(value) {
         if (typeof value == "object") {
             if ("x" in value && "y" in value && "z" in value) {
                 return "Qt.vector3d(" + value.x + ", " +
@@ -123,44 +122,44 @@ Item {
     }
 
     function compare(actual, expected, msg) {
-        var act = formatValue(actual)
-        var exp = formatValue(expected)
-        var success = compareInternal(actual, expected)
+        var act = qtest_formatValue(actual)
+        var exp = qtest_formatValue(expected)
+        var success = qtest_compareInternal(actual, expected)
         if (!msg)
             msg = ""
-        if (!results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+        if (!qtest_results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
     }
 
     function tryCompare(obj, prop, value, timeout) {
         if (!timeout)
             timeout = 5000
-        if (!compareInternal(obj[prop], value))
+        if (!qtest_compareInternal(obj[prop], value))
             wait(0)
         var i = 0
-        while (i < timeout && !compareInternal(obj[prop], value)) {
+        while (i < timeout && !qtest_compareInternal(obj[prop], value)) {
             wait(50)
             i += 50
         }
         var actual = obj[prop]
-        var act = formatValue(actual)
-        var exp = formatValue(value)
-        var success = compareInternal(actual, value)
-        if (!results.compare(success, "property " + prop, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+        var act = qtest_formatValue(actual)
+        var exp = qtest_formatValue(value)
+        var success = qtest_compareInternal(actual, value)
+        if (!qtest_results.compare(success, "property " + prop, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
     }
 
     function skip(msg) {
         if (!msg)
             msg = ""
-        results.skipSingle(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
+        qtest_results.skipSingle(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::skip")
     }
 
     function skipAll(msg) {
         if (!msg)
             msg = ""
-        results.skipAll(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
+        qtest_results.skipAll(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::skip")
     }
 
@@ -169,7 +168,7 @@ Item {
             tag = ""
         if (!msg)
             msg = ""
-        if (!results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+        if (!qtest_results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }
 
@@ -178,28 +177,28 @@ Item {
             tag = ""
         if (!msg)
             msg = ""
-        if (!results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
+        if (!qtest_results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }
 
     function warn(msg) {
         if (!msg)
             msg = ""
-        results.warn(msg);
+        qtest_results.warn(msg);
     }
 
     function ignoreWarning(msg) {
         if (!msg)
             msg = ""
-        results.ignoreWarning(msg)
+        qtest_results.ignoreWarning(msg)
     }
 
     function wait(ms) {
-        results.wait(ms)
+        qtest_results.wait(ms)
     }
 
     function sleep(ms) {
-        results.sleep(ms)
+        qtest_results.sleep(ms)
     }
 
     // Functions that can be overridden in subclasses for init/cleanup duties.
@@ -208,82 +207,82 @@ Item {
     function init() {}
     function cleanup() {}
 
-    function runInternal(prop, arg) {
+    function qtest_runInternal(prop, arg) {
         try {
-            testCaseResult = testCase[prop](arg)
+            qtest_testCaseResult = testCase[prop](arg)
         } catch (e) {
-            testCaseResult = []
+            qtest_testCaseResult = []
             if (e.message.indexOf("QtQuickTest::") != 0) {
                 // Test threw an unrecognized exception - fail.
-                results.fail("Uncaught exception: " + e.message,
+                qtest_results.fail("Uncaught exception: " + e.message,
                              e.fileName, e.lineNumber)
             }
         }
-        return !results.dataFailed
+        return !qtest_results.dataFailed
     }
 
-    function runFunction(prop, arg) {
-        results.functionType = TestResult.InitFunc
-        runInternal("init")
-        if (!results.skipped) {
-            results.functionType = TestResult.Func
-            runInternal(prop, arg)
-            results.functionType = TestResult.CleanupFunc
-            runInternal("cleanup")
+    function qtest_runFunction(prop, arg) {
+        qtest_results.functionType = TestResult.InitFunc
+        qtest_runInternal("init")
+        if (!qtest_results.skipped) {
+            qtest_results.functionType = TestResult.Func
+            qtest_runInternal(prop, arg)
+            qtest_results.functionType = TestResult.CleanupFunc
+            qtest_runInternal("cleanup")
         }
-        results.functionType = TestResult.NoWhere
+        qtest_results.functionType = TestResult.NoWhere
     }
 
-    function runBenchmarkFunction(prop, arg) {
-        results.startMeasurement()
+    function qtest_runBenchmarkFunction(prop, arg) {
+        qtest_results.startMeasurement()
         do {
-            results.beginDataRun()
+            qtest_results.beginDataRun()
             do {
                 // Run the initialization function.
-                results.functionType = TestResult.InitFunc
-                runInternal("init")
-                if (results.skipped)
+                qtest_results.functionType = TestResult.InitFunc
+                qtest_runInternal("init")
+                if (qtest_results.skipped)
                     break
 
                 // Execute the benchmark function.
-                results.functionType = TestResult.Func
+                qtest_results.functionType = TestResult.Func
                 if (prop.indexOf("benchmark_once_") != 0)
-                    results.startBenchmark(TestResult.RepeatUntilValidMeasurement, results.dataTag)
+                    qtest_results.startBenchmark(TestResult.RepeatUntilValidMeasurement, qtest_results.dataTag)
                 else
-                    results.startBenchmark(TestResult.RunOnce, results.dataTag)
-                while (!results.isBenchmarkDone()) {
-                    if (!runInternal(prop, arg))
+                    qtest_results.startBenchmark(TestResult.RunOnce, qtest_results.dataTag)
+                while (!qtest_results.isBenchmarkDone()) {
+                    if (!qtest_runInternal(prop, arg))
                         break
-                    results.nextBenchmark()
+                    qtest_results.nextBenchmark()
                 }
-                results.stopBenchmark()
+                qtest_results.stopBenchmark()
 
                 // Run the cleanup function.
-                results.functionType = TestResult.CleanupFunc
-                runInternal("cleanup")
-                results.functionType = TestResult.NoWhere
-            } while (!results.measurementAccepted())
-            results.endDataRun()
-        } while (results.needsMoreMeasurements())
+                qtest_results.functionType = TestResult.CleanupFunc
+                qtest_runInternal("cleanup")
+                qtest_results.functionType = TestResult.NoWhere
+            } while (!qtest_results.measurementAccepted())
+            qtest_results.endDataRun()
+        } while (qtest_results.needsMoreMeasurements())
     }
 
-    function run() {
+    function qtest_run() {
         if (TestLogger.log_start_test()) {
-            results.reset()
-            results.testCaseName = name
-            results.startLogging()
+            qtest_results.reset()
+            qtest_results.testCaseName = name
+            qtest_results.startLogging()
         } else {
-            results.testCaseName = name
+            qtest_results.testCaseName = name
         }
         running = true
 
         // Run the initTestCase function.
-        results.functionName = "initTestCase"
-        results.functionType = TestResult.InitFunc
+        qtest_results.functionName = "initTestCase"
+        qtest_results.functionType = TestResult.InitFunc
         var runTests = true
-        if (!runInternal("initTestCase"))
+        if (!qtest_runInternal("initTestCase"))
             runTests = false
-        results.finishTestFunction()
+        qtest_results.finishTestFunction()
 
         // Run the test methods.
         var testList = []
@@ -302,72 +301,72 @@ Item {
             var prop = testList[index]
             var datafunc = prop + "_data"
             var isBenchmark = (prop.indexOf("benchmark_") == 0)
-            results.functionName = prop
+            qtest_results.functionName = prop
             if (datafunc in testCase) {
-                results.functionType = TestResult.DataFunc
-                if (runInternal(datafunc)) {
-                    var table = testCaseResult
+                qtest_results.functionType = TestResult.DataFunc
+                if (qtest_runInternal(datafunc)) {
+                    var table = qtest_testCaseResult
                     var haveData = false
-                    results.initTestTable()
+                    qtest_results.initTestTable()
                     for (var index in table) {
                         haveData = true
                         var row = table[index]
                         if (!row.tag)
                             row.tag = "row " + index    // Must have something
-                        results.dataTag = row.tag
+                        qtest_results.dataTag = row.tag
                         if (isBenchmark)
-                            runBenchmarkFunction(prop, row)
+                            qtest_runBenchmarkFunction(prop, row)
                         else
-                            runFunction(prop, row)
-                        results.dataTag = ""
+                            qtest_runFunction(prop, row)
+                        qtest_results.dataTag = ""
                     }
                     if (!haveData)
-                        results.warn("no data supplied for " + prop + "() by " + datafunc + "()")
-                    results.clearTestTable()
+                        qtest_results.warn("no data supplied for " + prop + "() by " + datafunc + "()")
+                    qtest_results.clearTestTable()
                 }
             } else if (isBenchmark) {
-                runBenchmarkFunction(prop, null, isBenchmark)
+                qtest_runBenchmarkFunction(prop, null, isBenchmark)
             } else {
-                runFunction(prop, null, isBenchmark)
+                qtest_runFunction(prop, null, isBenchmark)
             }
-            results.finishTestFunction()
-            results.skipped = false
+            qtest_results.finishTestFunction()
+            qtest_results.skipped = false
         }
 
         // Run the cleanupTestCase function.
-        results.skipped = false
-        results.functionName = "cleanupTestCase"
-        results.functionType = TestResult.CleanupFunc
-        runInternal("cleanupTestCase")
+        qtest_results.skipped = false
+        qtest_results.functionName = "cleanupTestCase"
+        qtest_results.functionType = TestResult.CleanupFunc
+        qtest_runInternal("cleanupTestCase")
 
         // Clean up and exit.
         running = false
         completed = true
-        results.finishTestFunction()
-        results.functionName = ""
+        qtest_results.finishTestFunction()
+        qtest_results.functionName = ""
 
         // Stop if there are no more tests to be run.
-        if (!TestLogger.log_complete_test(testId)) {
-            results.stopLogging()
+        if (!TestLogger.log_complete_test(qtest_testId)) {
+            qtest_results.stopLogging()
             Qt.quit()
         }
-        results.testCaseName = ""
+        qtest_results.testCaseName = ""
     }
 
     onWhenChanged: {
-        if (when != prevWhen) {
-            prevWhen = when
+        if (when != qtest_prevWhen) {
+            qtest_prevWhen = when
             if (when && !completed && !running)
-                run()
+                qtest_run()
         }
     }
 
     onOptionalChanged: {
         if (!completed) {
             if (optional)
-                TestLogger.log_optional_test(testId)
+                TestLogger.log_optional_test(qtest_testId)
             else
-                TestLogger.log_mandatory_test(testId)
+                TestLogger.log_mandatory_test(qtest_testId)
         }
     }
 
@@ -375,21 +374,21 @@ Item {
     // window is actually shown.  If we are running with qmlviewer,
     // then this won't happen.  So we use a timer instead.
     Timer {
-        id: windowShowTimer
+        id: qtest_windowShowTimer
         interval: 100
         repeat: false
         onTriggered: { windowShown = true }
     }
 
     Component.onCompleted: {
-        testId = TestLogger.log_register_test(name)
+        qtest_testId = TestLogger.log_register_test(name)
         if (optional)
-            TestLogger.log_optional_test(testId)
-        prevWhen = when
+            TestLogger.log_optional_test(qtest_testId)
+        qtest_prevWhen = when
         var isQmlViewer = Qt.qtest_wrapper ? false : true
         if (isQmlViewer)
-            windowShowTimer.running = true
+            qtest_windowShowTimer.running = true
         if (when && !completed && !running)
-            run()
+            qtest_run()
     }
 }
