@@ -73,6 +73,12 @@ See "tests/qmlexample" for an example of creating a test harness
 that uses resources and "tests/qmlauto" for an example that uses
 the QUICK_TEST_SOURCE_DIR macro.
 
+If your test case needs QML imports, then you can add them as
+"-import" options to the the test program command-line by adding
+the following line to your .pro file:
+
+    IMPORTPATH += $$PWD/../imports/my_module1 $$PWD/../imports/my_module2
+
 Basic test cases
 ================
 

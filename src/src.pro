@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS = quicktestlib imports
+SUBDIRS = quicktestlib imports qmltestrunner
 CONFIG += ordered
