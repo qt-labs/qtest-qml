@@ -11,7 +11,7 @@ symbian {
     }
 }
 
-QT += declarative
+QT += declarative script
 
 SOURCES += main.cpp
 HEADERS +=

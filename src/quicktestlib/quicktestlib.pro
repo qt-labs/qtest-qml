@@ -1,11 +1,10 @@
 TEMPLATE = lib
 TARGET = QtQuickTest$${QT_LIBINFIX}
 CONFIG += dll warn_on
-QT += declarative
+QT += declarative script
 DESTDIR = ../../lib
 
 win32 {
-    CONFIG += debug_and_release debug_and_release_config build_all
     DLLDESTDIR = ../../bin
     !static:DEFINES += QT_MAKEDLL
 
@@ -40,7 +39,7 @@ HEADERS += $$PRIVATE_HEADERS
 
 include(testlib/testlib.pri)
 
-DEFINES += QT_BUILD_QUCIK_TEST_LIB
+DEFINES += QT_BUILD_QUICK_TEST_LIB
 
 !symbian {
     target.path += $$[QT_INSTALL_LIBS]
