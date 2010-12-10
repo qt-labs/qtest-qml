@@ -16,3 +16,5 @@ symbian {
     featuresDir=$$replace(featuresDir,/,\\)
     system(copy "$$qmltestcaseFile $$featuresDir")
 }
+
+include(doc/doc.pri)

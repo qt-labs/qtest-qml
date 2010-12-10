@@ -16,3 +16,7 @@ and QML module definitions into the Qt build tree.
 There is an example test case in the "tests/qmlexample" directory that
 shows how to integrate QML unit tests into a qmake-based build system.
 Also see "doc/testcases.txt" for an introduction to writing unit tests.
+
+You can also run "make check" to verify that the example tests pass
+correctly, and "make docs" to generate the HTML documentation under
+\c{doc/html}.

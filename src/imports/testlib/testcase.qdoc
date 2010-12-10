@@ -90,6 +90,10 @@
     the test framework will sort the functions on ascending order of name.
     This can help when there are two tests that must be run in order.
 
+    Multiple TestCase elements can be supplied.  The test program will exit
+    once they have all completed.  If a test case doesn't need to run
+    (because a precondition has failed), then \l optional can be set to true.
+
     \section1 Data-driven tests
 
     Table data can be provided to a test using a function name that ends
@@ -168,13 +172,31 @@
     \qmlproperty bool TestCase::when
 
     This property should be set to true when the application wants
-    the test cases to run.  The default value is true.
+    the test cases to run.  The default value is true.  In the following
+    example, a test is run when the user presses the mouse button:
 
     \code
-    TestCase {
-        name: "ButtonTests"
-        when: button.pressed
-        ...
+    Rectangle {
+        id: foo
+        width: 640; height: 480
+        color: "cyan"
+
+        MouseArea {
+            id: area
+            anchors.fill: parent
+        }
+
+        property bool bar: true
+
+        TestCase {
+            name: "ItemTests"
+            when: area.pressed
+            id: test1
+
+            function test_bar() {
+                verify(bar)
+            }
+        }
     }
     \endcode
 
@@ -290,6 +312,14 @@
     This function is intended for testing applications where a property
     changes value based on asynchronous events.  Use compare() for testing
     synchronous property changes.
+
+    \code
+    tryCompare(img, "status", BorderImage.Ready)
+    compare(img.width, 120)
+    compare(img.height, 120)
+    compare(img.horizontalTileMode, BorderImage.Stretch)
+    compare(img.verticalTileMode, BorderImage.Stretch)
+    \endcode
 
     \sa compare()
 */
