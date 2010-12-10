@@ -215,7 +215,8 @@ Item {
             testCaseResult = []
             if (e.message.indexOf("QtQuickTest::") != 0) {
                 // Test threw an unrecognized exception - fail.
-                fail(e.message)
+                results.fail("Uncaught exception: " + e.message,
+                             e.fileName, e.lineNumber)
             }
         }
         return !results.dataFailed
