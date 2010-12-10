@@ -122,6 +122,8 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
         } else if (strcmp(argv[index], "-input") == 0 && (index + 1) < argc) {
             testPath = stripQuotes(QString::fromLocal8Bit(argv[index + 1]));
             index += 2;
+        } else if (strcmp(argv[index], "-opengl") == 0) {
+            ++index;
         } else if (outargc != index) {
             argv[outargc++] = argv[index++];
         } else {
