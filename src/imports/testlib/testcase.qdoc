@@ -128,7 +128,7 @@
     \section1 Benchmarks
 
     Functions whose names start with "benchmark_" will be run multiple
-    times with the Qt benchmark framework, with a average timing value
+    times with the Qt benchmark framework, with an average timing value
     reported for the runs.  This is equivalent to using the \c{QBENCHMARK}
     macro in the C++ version of QTestLib.
 
@@ -274,16 +274,14 @@
 */
 
 /*!
-    \qmlmethod TestCase::fail()
-    \qmlmethod TestCase::fail(message)
+    \qmlmethod TestCase::fail(message = "")
 
     Fails the current test case, with the optional \a message.
     Similar to \c{QFAIL(message)} in C++.
 */
 
 /*!
-    \qmlmethod TestCase::verify(condition)
-    \qmlmethod TestCase::verify(condition, message)
+    \qmlmethod TestCase::verify(condition, message = "")
 
     Fails the current test case if \a condition is false, and
     displays the optional \a message.  Similar to \c{QVERIFY(condition)}
@@ -291,8 +289,7 @@
 */
 
 /*!
-    \qmlmethod TestCase::compare(actual, expected)
-    \qmlmethod TestCase::compare(actual, expected, message)
+    \qmlmethod TestCase::compare(actual, expected, message = "")
 
     Fails the current test case if \a actual is not the same as
     \a expected, and displays the optional \a message.  Similar
@@ -302,12 +299,11 @@
 */
 
 /*!
-    \qmlmethod TestCase::tryCompare(obj, property, expected)
-    \qmlmethod TestCase::tryCompare(obj, property, expected, timeout)
+    \qmlmethod TestCase::tryCompare(obj, property, expected, timeout = 5000)
 
     Fails the current test case if the specified \a property on \a obj
     is not the same as \a expected.  The test will be retried multiple
-    times until the \a timeout is reached (default is 5000 milliseconds).
+    times until the \a timeout (in milliseconds) is reached.
 
     This function is intended for testing applications where a property
     changes value based on asynchronous events.  Use compare() for testing
@@ -325,8 +321,7 @@
 */
 
 /*!
-    \qmlmethod TestCase::skip()
-    \qmlmethod TestCase::skip(message)
+    \qmlmethod TestCase::skip(message = "")
 
     Skips the current test case and prints the optional \a message.
     If this is a data-driven test, then only the current row is skipped.
@@ -336,8 +331,7 @@
 */
 
 /*!
-    \qmlmethod TestCase::skipAll()
-    \qmlmethod TestCase::skipAll(message)
+    \qmlmethod TestCase::skipAll(message = "")
 
     Skips the current test case and prints the optional \a message.
     If this is a data-driven test, then all remaining rows are skipped.
@@ -347,24 +341,22 @@
 */
 
 /*!
-    \qmlmethod TestCase::expectFail(tag)
-    \qmlmethod TestCase::expectFail(tag, message)
+    \qmlmethod TestCase::expectFail(tag, message = "")
 
     In a data-driven test, marks the row associated with \a tag as
-    expected to fail.  When the fail occurs, display \a message,
-    abort the test, and mark the test as passing.  Similar to
-    \c{QEXPECT_FAIL(tag, message, Abort)} in C++.
+    expected to fail.  When the fail occurs, display the optional
+    \a message, abort the test, and mark the test as passing.
+    Similar to \c{QEXPECT_FAIL(tag, message, Abort)} in C++.
 
     \sa expectFailContinue()
 */
 
 /*!
-    \qmlmethod TestCase::expectFailContinue(tag)
-    \qmlmethod TestCase::expectFailContinue(tag, message)
+    \qmlmethod TestCase::expectFailContinue(tag, message = "")
 
     In a data-driven test, marks the row associated with \a tag as
-    expected to fail.  When the fail occurs, display \a message,
-    and then continue the test.  Similar to
+    expected to fail.  When the fail occurs, display the optional
+    \a message, and then continue the test.  Similar to
     \c{QEXPECT_FAIL(tag, message, Continue)} in C++.
 
     \sa expectFail()
