@@ -72,17 +72,18 @@ Item {
     property bool qtest_prevWhen: true
     property int qtest_testId: -1
     property variant qtest_testCaseResult
-    TestResult { id: qtest_results }
+    property variant qtest_results: qtest_results_normal
+    TestResult { id: qtest_results_normal }
 
     function fail(msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = "";
         qtest_results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::fail")
     }
 
     function verify(cond, msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = "";
         if (!qtest_results.verify(cond, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
@@ -125,7 +126,7 @@ Item {
         var act = qtest_formatValue(actual)
         var exp = qtest_formatValue(expected)
         var success = qtest_compareInternal(actual, expected)
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         if (!qtest_results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
@@ -150,45 +151,45 @@ Item {
     }
 
     function skip(msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         qtest_results.skipSingle(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::skip")
     }
 
     function skipAll(msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         qtest_results.skipAll(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
         throw new Error("QtQuickTest::skip")
     }
 
     function expectFail(tag, msg) {
-        if (!tag)
+        if (tag === undefined)
             tag = ""
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         if (!qtest_results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }
 
     function expectFailContinue(tag, msg) {
-        if (!tag)
+        if (tag === undefined)
             tag = ""
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         if (!qtest_results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }
 
     function warn(msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         qtest_results.warn(msg);
     }
 
     function ignoreWarning(msg) {
-        if (!msg)
+        if (msg === undefined)
             msg = ""
         qtest_results.ignoreWarning(msg)
     }
