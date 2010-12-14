@@ -46,7 +46,7 @@ Button {
     id: button
     onClicked: text = "Clicked"
     TestCase {
-        name: "ClickTest"
+        name: "ButtonClick"
         when: windowShown
 
         function test_click() {
