@@ -74,11 +74,20 @@ Item {
     property variant qtest_testCaseResult
     property variant qtest_results: qtest_results_normal
     TestResult { id: qtest_results_normal }
+    property variant qtest_events: qtest_events_normal
+    TestEvent { id: qtest_events_normal }
 
     function fail(msg) {
         if (msg === undefined)
             msg = "";
         qtest_results.fail(msg, Qt.qtest_caller_file(), Qt.qtest_caller_line())
+        throw new Error("QtQuickTest::fail")
+    }
+
+    function qtest_fail(msg, frame) {
+        if (msg === undefined)
+            msg = "";
+        qtest_results.fail(msg, Qt.qtest_caller_file(frame), Qt.qtest_caller_line(frame))
         throw new Error("QtQuickTest::fail")
     }
 
@@ -200,6 +209,84 @@ Item {
 
     function sleep(ms) {
         qtest_results.sleep(ms)
+    }
+
+    function keyPress(key, modifiers, delay) {
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.keyPress(key, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function keyRelease(key, modifiers, delay) {
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.keyRelease(key, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function keyClick(key, modifiers, delay) {
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.keyClick(key, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function mousePress(item, x, y, button, modifiers, delay) {
+        if (button === undefined)
+            button = Qt.LeftButton
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.mousePress(item, x, y, button, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function mouseRelease(item, x, y, button, modifiers, delay) {
+        if (button === undefined)
+            button = Qt.LeftButton
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.mouseRelease(item, x, y, button, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function mouseClick(item, x, y, button, modifiers, delay) {
+        if (button === undefined)
+            button = Qt.LeftButton
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.mouseClick(item, x, y, button, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function mouseDoubleClick(item, x, y, button, modifiers, delay) {
+        if (button === undefined)
+            button = Qt.LeftButton
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.mouseDoubleClick(item, x, y, button, modifiers, delay))
+            qtest_fail("window not shown", 2)
+    }
+
+    function mouseMove(item, x, y, delay) {
+        if (delay == undefined)
+            delay = -1
+        if (!qtest_events.mouseMove(item, x, y, delay))
+            qtest_fail("window not shown", 2)
     }
 
     // Functions that can be overridden in subclasses for init/cleanup duties.

@@ -152,6 +152,38 @@
 
     To get the effect of the \c{QBENCHMARK_ONCE} macro, prefix the test
     function name with "benchmark_once_".
+
+    \section1 Simulating keyboard and mouse events
+
+    The keyPress(), keyRelease(), and keyClick() methods can be used
+    to simulate keyboard events within unit tests.  The events are
+    delivered to the currently focused QML item.
+
+    \code
+    Rectangle {
+        width: 50; height: 50
+        focus: true
+
+        TestCase {
+            name: "KeyClick"
+            when: windowShown
+
+            function test_key_click() {
+                keyClick(Qt.Key_Left)
+                ...
+            }
+        }
+    }
+    \endcode
+
+    The mousePress(), mouseRelease(), mouseClick(), mouseDoubleClick(),
+    and mouseMove() methods can be used to simulate mouse events in a
+    similar fashion.
+
+    \bold{Note:} keyboard and mouse events can only be delivered once the
+    main window has been shown.  Attempts to deliver events before then
+    will fail.  Use the \l when and windowShown properties to track
+    when the main window has been shown.
 */
 
 /*!
@@ -396,6 +428,117 @@
     Sleeps for \a ms milliseconds without processing Qt events.
 
     \sa wait()
+*/
+
+/*!
+    \qmlmethod TestCase::keyClick(key, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates clicking of \a key with an optional \a modifier on the currently
+    focused item.  If \a delay is larger than 0, the test will wait for
+    \a delay milliseconds.
+
+    \sa keyPress(), keyRelease()
+*/
+
+/*!
+    \qmlmethod TestCase::keyPress(key, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates pressing a \a key with an optional \a modifier on the currently
+    focused item.  If \a delay is larger than 0, the test will wait for
+    \a delay milliseconds.
+
+    \bold{Note:} At some point you should release the key using keyRelease().
+
+    \sa keyRelease(), keyClick()
+*/
+
+/*!
+    \qmlmethod TestCase::keyRelease(key, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates releasing a \a key with an optional \a modifier on the currently
+    focused item.  If \a delay is larger than 0, the test will wait for
+    \a delay milliseconds.
+
+    \sa keyPress(), keyClick()
+*/
+
+/*!
+    \qmlmethod TestCase::mousePress(item, x, y, button = Qt.LeftButton, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates pressing a mouse \a button with an optional \a modifier
+    on an \a item.  The position is defined by \a x and \a y.  If \a delay is
+    specified, the test will wait for the specified amount of milliseconds
+    before the press.
+
+    The position given by \a x and \a y is transformed from the co-ordinate
+    system of \a item into window co-ordinates and then delivered.
+    If \a item is obscured by another item, or a child of \a item occupies
+    that position, then the event will be delivered to the other item instead.
+
+    \sa mouseRelease(), mouseClick(), mouseDoubleClick(), mouseMove()
+*/
+
+/*!
+    \qmlmethod TestCase::mouseRelease(item, x, y, button = Qt.LeftButton, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates releasing a mouse \a button with an optional \a modifier
+    on an \a item.  The position of the release is defined by \a x and \a y.
+    If \a delay is specified, the test will wait for the specified amount of
+    milliseconds before releasing the button.
+
+    The position given by \a x and \a y is transformed from the co-ordinate
+    system of \a item into window co-ordinates and then delivered.
+    If \a item is obscured by another item, or a child of \a item occupies
+    that position, then the event will be delivered to the other item instead.
+
+    \sa mousePress(), mouseClick(), mouseDoubleClick(), mouseMove()
+*/
+
+/*!
+    \qmlmethod TestCase::mouseClick(item, x, y, button = Qt.LeftButton, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates clicking a mouse \a button with an optional \a modifier
+    on an \a item.  The position of the click is defined by \a x and \a y.
+    If \a delay is specified, the test will wait for the specified amount of
+    milliseconds before pressing and before releasing the button.
+
+    The position given by \a x and \a y is transformed from the co-ordinate
+    system of \a item into window co-ordinates and then delivered.
+    If \a item is obscured by another item, or a child of \a item occupies
+    that position, then the event will be delivered to the other item instead.
+
+    \sa mousePress(), mouseRelease(), mouseDoubleClick(), mouseMove()
+*/
+
+/*!
+    \qmlmethod TestCase::mouseDoubleClick(item, x, y, button = Qt.LeftButton, modifiers = Qt.NoModifier, delay = -1)
+
+    Simulates double-clicking a mouse \a button with an optional \a modifier
+    on an \a item.  The position of the click is defined by \a x and \a y.
+    If \a delay is specified, the test will wait for the specified amount of
+    milliseconds before pressing and before releasing the button.
+
+    The position given by \a x and \a y is transformed from the co-ordinate
+    system of \a item into window co-ordinates and then delivered.
+    If \a item is obscured by another item, or a child of \a item occupies
+    that position, then the event will be delivered to the other item instead.
+
+    \sa mousePress(), mouseRelease(), mouseClick(), mouseMove()
+*/
+
+/*!
+    \qmlmethod TestCase::mouseMove(item, x, y, delay = -1)
+
+    Moves the mouse pointer to the position given by \a x and \a y within
+    \a item.  If a \a delay (in milliseconds) is given, the test will wait
+    before moving the mouse pointer.
+
+    The position given by \a x and \a y is transformed from the co-ordinate
+    system of \a item into window co-ordinates and then delivered.
+    If \a item is obscured by another item, or a child of \a item occupies
+    that position, then the event will be delivered to the other item instead.
+
+    \sa mousePress(), mouseRelease(), mouseClick(), mouseDoubleClick()
 */
 
 /*!

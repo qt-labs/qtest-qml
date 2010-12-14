@@ -28,11 +28,13 @@ INCLUDEPATH += $$PWD
 
 SOURCES += \
     quicktest.cpp \
+    quicktestevent.cpp \
     quicktestresult.cpp
 HEADERS += \
     QtQuickTest/quicktestglobal.h \
     QtQuickTest/quicktest.h
 PRIVATE_HEADERS += \
+    quicktestevent_p.h \
     quicktestresult_p.h
 
 PUBLIC_HEADERS += $$HEADERS

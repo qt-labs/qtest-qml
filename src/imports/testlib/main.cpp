@@ -46,10 +46,12 @@
 #include <QtScript/qscriptcontextinfo.h>
 #include <QtScript/qscriptengine.h>
 #include "quicktestresult_p.h"
+#include "quicktestevent_p.h"
 
 QT_BEGIN_NAMESPACE
 
 QML_DECLARE_TYPE(QuickTestResult)
+QML_DECLARE_TYPE(QuickTestEvent)
 
 // Copied from qdeclarativedebughelper_p.h in Qt, to avoid a dependency
 // on a private header from Qt.
@@ -105,6 +107,7 @@ public:
     {
         Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuickTest"));
         qmlRegisterType<QuickTestResult>(uri,1,0,"TestResult");
+        qmlRegisterType<QuickTestEvent>(uri,1,0,"TestEvent");
     }
     void initializeEngine(QDeclarativeEngine *engine, const char *)
     {
