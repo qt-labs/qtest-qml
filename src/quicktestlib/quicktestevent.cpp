@@ -100,7 +100,7 @@ namespace QtQuickTest
 
         if (delay == -1 || delay < QTest::defaultMouseDelay())
             delay = QTest::defaultMouseDelay();
-        if(delay > 0)
+        if (delay > 0)
             QTest::qWait(delay);
 
         if (action == MouseClick) {
