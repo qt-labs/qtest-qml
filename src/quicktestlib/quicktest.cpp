@@ -167,7 +167,6 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
 
     // Scan through all of the "tst_*.qml" files and run each of them
     // in turn with a QDeclarativeView.
-    bool compileFail = false;
     foreach (QString file, files) {
         QFileInfo fi(file);
         if (!fi.exists())
@@ -197,8 +196,20 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
         else
             view.setSource(QUrl::fromLocalFile(path));
         if (view.status() == QDeclarativeView::Error) {
-            // Error compiling the test - flag failure and continue.
-            compileFail = true;
+            // Error compiling the test - flag failure in the log and continue.
+            QList<QDeclarativeError> errors = view.errors();
+            QuickTestResult results;
+            results.setTestCaseName(fi.baseName());
+            results.startLogging();
+            results.setFunctionName(QLatin1String("compile"));
+            results.setFunctionType(QuickTestResult::Func);
+            results.fail(errors.at(0).description(),
+                         errors.at(0).url().toString(),
+                         errors.at(0).line());
+            results.finishTestFunction();
+            results.setFunctionName(QString());
+            results.setFunctionType(QuickTestResult::NoWhere);
+            results.stopLogging();
             continue;
         }
         if (!rootobj.hasQuit) {
@@ -218,10 +229,7 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     QuickTestResult::setProgramName(0);
 
     // Return the number of failures as the exit code.
-    int code = QuickTestResult::exitCode();
-    if (!code && compileFail)
-        ++code;
-    return code;
+    return QuickTestResult::exitCode();
 }
 
 QT_END_NAMESPACE
