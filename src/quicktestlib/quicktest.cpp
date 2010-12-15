@@ -134,7 +134,7 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     argv[outargc] = 0;
     argc = outargc;
 
-    // Determine where to look for the test data. 
+    // Determine where to look for the test data.
     if (testPath.isEmpty() && sourceDir)
         testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())

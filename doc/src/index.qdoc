@@ -104,7 +104,7 @@
     then the current directory will be scanned when the harness is run.
     Other *.qml files may appear for auxillary QML components that are
     used by the test.
-    
+
     The \c{-input} command-line option can be set at runtime to run
     test cases from a different directory.  This may be needed to run
     tests on a target device where the compiled-in directory name refers
