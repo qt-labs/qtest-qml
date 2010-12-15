@@ -134,10 +134,7 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     argv[outargc] = 0;
     argc = outargc;
 
-    // Determine where to look for the test data.  If QUICK_TEST_SOURCE_DIR
-    // is set, then use that.  Otherwise scan the application's resources.
-    if (testPath.isEmpty())
-        testPath = QString::fromLocal8Bit(qgetenv("QUICK_TEST_SOURCE_DIR"));
+    // Determine where to look for the test data. 
     if (testPath.isEmpty() && sourceDir)
         testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())
@@ -152,6 +149,21 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
                       QDirIterator::FollowSymlinks);
     while (iter.hasNext())
         files += iter.next();
+    if (testPath == QLatin1String(":/")) {
+        if (files.isEmpty()) {
+            // No QML tests in the program resources - search "." instead.
+            testPath = QLatin1String(".");
+            QDirIterator iter(testPath, filters, QDir::Files,
+                              QDirIterator::Subdirectories |
+                              QDirIterator::FollowSymlinks);
+            while (iter.hasNext())
+                files += iter.next();
+        } else {
+            qWarning() << argv[0]
+                       << ": test cases in resources are deprecated and will "
+                          "be removed soon";
+        }
+    }
     files.sort();
 
     // Bail out if we didn't find any test cases.
