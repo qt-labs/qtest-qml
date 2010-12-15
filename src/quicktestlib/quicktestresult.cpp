@@ -380,11 +380,19 @@ void QuickTestResult::finishTestFunction()
     QTestResult::finishedCurrentTestFunction();
 }
 
+static QString qtest_fixFile(const QString &file)
+{
+    if (file.startsWith(QLatin1String("file://")))
+        return file.mid(7);
+    else
+        return file;
+}
+
 void QuickTestResult::fail
     (const QString &message, const QString &file, int line)
 {
     QTestResult::addFailure(message.toLatin1().constData(),
-                            file.toLatin1().constData(), line);
+                            qtest_fixFile(file).toLatin1().constData(), line);
 }
 
 bool QuickTestResult::verify
@@ -392,11 +400,12 @@ bool QuickTestResult::verify
 {
     if (message.isEmpty()) {
         return QTestResult::verify
-            (success, "verify()", "", file.toLatin1().constData(), line);
+            (success, "verify()", "",
+             qtest_fixFile(file).toLatin1().constData(), line);
     } else {
         return QTestResult::verify
             (success, message.toLatin1().constData(), "",
-             file.toLatin1().constData(), line);
+             qtest_fixFile(file).toLatin1().constData(), line);
     }
 }
 
@@ -410,21 +419,21 @@ bool QuickTestResult::compare
          QTest::toString(val1.toLatin1().constData()),
          QTest::toString(val2.toLatin1().constData()),
          "", "",
-         file.toLatin1().constData(), line);
+         qtest_fixFile(file).toLatin1().constData(), line);
 }
 
 void QuickTestResult::skipSingle
     (const QString &message, const QString &file, int line)
 {
-    QTestResult::addSkip(message.toLatin1().constData(),
-                         QTest::SkipSingle, file.toLatin1().constData(), line);
+    QTestResult::addSkip(message.toLatin1().constData(), QTest::SkipSingle,
+                         qtest_fixFile(file).toLatin1().constData(), line);
 }
 
 void QuickTestResult::skipAll
     (const QString &message, const QString &file, int line)
 {
-    QTestResult::addSkip(message.toLatin1().constData(),
-                         QTest::SkipAll, file.toLatin1().constData(), line);
+    QTestResult::addSkip(message.toLatin1().constData(), QTest::SkipAll,
+                         qtest_fixFile(file).toLatin1().constData(), line);
     QTestResult::setSkipCurrentTest(true);
 }
 
@@ -434,7 +443,7 @@ bool QuickTestResult::expectFail
     return QTestResult::expectFail
         (tag.toLatin1().constData(),
          QTest::toString(comment.toLatin1().constData()),
-         QTest::Abort, file.toLatin1().constData(), line);
+         QTest::Abort, qtest_fixFile(file).toLatin1().constData(), line);
 }
 
 bool QuickTestResult::expectFailContinue
@@ -443,7 +452,7 @@ bool QuickTestResult::expectFailContinue
     return QTestResult::expectFail
         (tag.toLatin1().constData(),
          QTest::toString(comment.toLatin1().constData()),
-         QTest::Continue, file.toLatin1().constData(), line);
+         QTest::Continue, qtest_fixFile(file).toLatin1().constData(), line);
 }
 
 void QuickTestResult::warn(const QString &message)
