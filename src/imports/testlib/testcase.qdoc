@@ -184,6 +184,8 @@
     main window has been shown.  Attempts to deliver events before then
     will fail.  Use the \l when and windowShown properties to track
     when the main window has been shown.
+
+    \sa SignalSpy
 */
 
 /*!
@@ -349,7 +351,10 @@
     compare(img.verticalTileMode, BorderImage.Stretch)
     \endcode
 
-    \sa compare()
+    SignalSpy::wait() provides an alternative method to wait for a
+    signal to be emitted.
+
+    \sa compare(), SignalSpy::wait()
 */
 
 /*!

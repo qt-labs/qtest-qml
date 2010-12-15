@@ -54,8 +54,8 @@
     \endcode
 
     Functions whose names start with \c{test_} are treated as test cases
-    to be executed.  See the documentation for the \l TestCase element
-    for more information on writing test cases.
+    to be executed.  See the documentation for the \l TestCase and
+    \l SignalSpy elements for more information on writing test cases.
 
     \section1 Building QtQuickTest
 

@@ -39,28 +39,45 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
-import QtQuickTest 1.0
+#ifndef SIGNALSPY_H
+#define SIGNALSPY_H
 
-Button {
-    id: button
-    onClicked: text = "Clicked"
+// This is a dummy header for defining the interface of "SignalSpy.qml" to qdoc.
 
-    SignalSpy {
-        id: spy
-        target: button
-        signalName: "clicked"
-    }
+#include <QtDeclarative/qdeclarativeitem.h>
 
-    TestCase {
-        name: "ButtonClick"
-        when: windowShown
+QT_BEGIN_HEADER
 
-        function test_click() {
-            compare(spy.count, 0)
-            button.clicked();
-            compare(button.text, "Clicked");
-            compare(spy.count, 1)
-        }
-    }
-}
+QT_BEGIN_NAMESPACE
+
+class SignalSpy : public QDeclarativeItem
+{
+    Q_OBJECT
+    Q_PROPERTY(QObject *target READ target WRITE setTarget NOTIFY targetChanged)
+    Q_PROPERTY(QString signalName READ signalName WRITE signalName NOTIFY signalNameChanged)
+    Q_PROPERTY(int count READ count countChanged)
+public:
+    SignalSpy(QDeclarativeItem *parent) : QDeclarativeItem(parent) {}
+    ~SignalSpy()
+
+    QObject *target() const;
+    void setTarget(QObject *target);
+
+    QString signalName() const;
+    void setSignalName(const QString &signalName);
+
+    int count() const;
+
+Q_SIGNALS:
+    void targetChanged();
+    void signalNameChanged();
+    void countChanged();
+};
+
+QML_DECLARE_TYPE(SignalSpy)
+
+QT_END_NAMESPACE
+
+QT_END_HEADER
+
+#endif

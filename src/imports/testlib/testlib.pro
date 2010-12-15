@@ -19,6 +19,7 @@ HEADERS +=
 qdeclarativesources.files += \
     qmldir \
     TestCase.qml \
+    SignalSpy.qml \
     testlogger.js
 
 qdeclarativesources.path += $$[QT_INSTALL_IMPORTS]/QtQuickTest
