@@ -174,19 +174,27 @@ Item {
     }
 
     function expectFail(tag, msg) {
-        if (tag === undefined)
+        if (tag === undefined) {
+            warn("tag argument missing from expectFail()")
             tag = ""
-        if (msg === undefined)
+        }
+        if (msg === undefined) {
+            warn("message argument missing from expectFail()")
             msg = ""
+        }
         if (!qtest_results.expectFail(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }
 
     function expectFailContinue(tag, msg) {
-        if (tag === undefined)
+        if (tag === undefined) {
+            warn("tag argument missing from expectFailContinue()")
             tag = ""
-        if (msg === undefined)
+        }
+        if (msg === undefined) {
+            warn("message argument missing from expectFailContinue()")
             msg = ""
+        }
         if (!qtest_results.expectFailContinue(tag, msg, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::expectFail")
     }

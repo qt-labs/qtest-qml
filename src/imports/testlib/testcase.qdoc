@@ -378,23 +378,29 @@
 */
 
 /*!
-    \qmlmethod TestCase::expectFail(tag, message = "")
+    \qmlmethod TestCase::expectFail(tag, message)
 
     In a data-driven test, marks the row associated with \a tag as
-    expected to fail.  When the fail occurs, display the optional
-    \a message, abort the test, and mark the test as passing.
-    Similar to \c{QEXPECT_FAIL(tag, message, Abort)} in C++.
+    expected to fail.  When the fail occurs, display the \a message,
+    abort the test, and mark the test as passing.  Similar to
+    \c{QEXPECT_FAIL(tag, message, Abort)} in C++.
+
+    If the test is not data-driven, then \a tag must be set to
+    the empty string.
 
     \sa expectFailContinue()
 */
 
 /*!
-    \qmlmethod TestCase::expectFailContinue(tag, message = "")
+    \qmlmethod TestCase::expectFailContinue(tag, message)
 
     In a data-driven test, marks the row associated with \a tag as
-    expected to fail.  When the fail occurs, display the optional
-    \a message, and then continue the test.  Similar to
+    expected to fail.  When the fail occurs, display the \a message,
+    and then continue the test.  Similar to
     \c{QEXPECT_FAIL(tag, message, Continue)} in C++.
+
+    If the test is not data-driven, then \a tag must be set to
+    the empty string.
 
     \sa expectFail()
 */

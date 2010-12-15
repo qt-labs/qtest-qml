@@ -58,7 +58,7 @@ TestCase {
     }
 
     function test_expecting() {
-        expectFail("this is the fail we wanted")
+        expectFail("", "this is the fail we wanted")
         verify(false)
     }
 
