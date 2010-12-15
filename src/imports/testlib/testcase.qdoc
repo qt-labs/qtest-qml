@@ -78,7 +78,7 @@
     FAIL!  : MathTests::test_fail() 2 + 2 = 5
        Actual (): 4
        Expected (): 5
-       Loc: [file:///.../tst_math.qml(12)]
+       Loc: [/home/.../tst_math.qml(12)]
     PASS   : MathTests::test_math()
     PASS   : MathTests::cleanupTestCase()
     Totals: 3 passed, 1 failed, 0 skipped
@@ -417,9 +417,9 @@
 /*!
     \qmlmethod TestCase::ignoreWarning(message)
 
-    Marks \a message as an ignored message.  When it occurs, the message
-    will not be printed and the test passes.  If the message does not
-    occur, then the test will fail.  Similar to
+    Marks \a message as an ignored warning message.  When it occurs,
+    the warning will not be printed and the test passes.  If the message
+    does not occur, then the test will fail.  Similar to
     \c{QTest::ignoreMessage(QtWarningMsg, message)} in C++.
 
     \sa warn()
