@@ -42,6 +42,7 @@
 #include "quicktest.h"
 #include "quicktestresult_p.h"
 #include "qtestsystem.h"
+#include "qtestoptions_p.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeview.h>
@@ -199,7 +200,10 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
         QScriptValue qtObject
             = engine->globalObject().property(QLatin1String("Qt"));
         qtObject.setProperty
-            (QLatin1String("qtest_wrapper"), engine->newVariant(true));
+            (QLatin1String("qtest_wrapper"), QScriptValue(true));
+        qtObject.setProperty
+            (QLatin1String("qtest_printAvailableFunctions"),
+             QScriptValue(QTest::printAvailableFunctions));
         foreach (QString path, imports)
             view.engine()->addImportPath(path);
         QString path = fi.absoluteFilePath();
@@ -207,6 +211,8 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
             view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
         else
             view.setSource(QUrl::fromLocalFile(path));
+        if (QTest::printAvailableFunctions)
+            continue;
         if (view.status() == QDeclarativeView::Error) {
             // Error compiling the test - flag failure in the log and continue.
             QList<QDeclarativeError> errors = view.errors();

@@ -367,6 +367,11 @@ Item {
     }
 
     function qtest_run() {
+        if (Qt.qtest_printAvailableFunctions) {
+            completed = true
+            return
+        }
+
         if (TestLogger.log_start_test()) {
             qtest_results.reset()
             qtest_results.testCaseName = name
@@ -481,6 +486,24 @@ Item {
     }
 
     Component.onCompleted: {
+        if (Qt.qtest_printAvailableFunctions) {
+            var testList = []
+            for (var prop in testCase) {
+                if (prop.indexOf("test_") != 0 && prop.indexOf("benchmark_") != 0)
+                    continue
+                var tail = prop.lastIndexOf("_data");
+                if (tail != -1 && tail == (prop.length - 5))
+                    continue
+                if (name.length > 0)
+                    testList.push(name + "::" + prop + "()")
+                else
+                    testList.push(prop + "()")
+            }
+            testList.sort()
+            for (var index in testList)
+                console.log(testList[index])
+            return
+        }
         qtest_testId = TestLogger.log_register_test(name)
         if (optional)
             TestLogger.log_optional_test(qtest_testId)
