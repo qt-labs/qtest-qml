@@ -45,6 +45,7 @@
 #include "qtestresult_p.h"
 #include "qtesttable_p.h"
 #include "qtestlog_p.h"
+#include "qtestoptions_p.h"
 #include "qbenchmark.h"
 #include "qbenchmark_p.h"
 #include <QtCore/qset.h>
@@ -303,6 +304,16 @@ int QuickTestResult::failCount() const
 int QuickTestResult::skipCount() const
 {
     return QTestResult::skipCount();
+}
+
+/*!
+    \qmlproperty list<string> TestResult::functionsToRun
+
+    This property returns the list of function names to be run.
+*/
+QStringList QuickTestResult::functionsToRun() const
+{
+    return QTest::testFunctions;
 }
 
 /*!

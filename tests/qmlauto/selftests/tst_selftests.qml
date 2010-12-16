@@ -52,6 +52,7 @@ TestCase {
         property string failmsg: "cleaned"
         property string actual: ""
         property string expected: ""
+        property variant functionsToRun: []
 
         function fail(msg, file, line) {
             failmsg = msg

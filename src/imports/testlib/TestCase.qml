@@ -381,6 +381,32 @@ Item {
         }
         running = true
 
+        // Check the run list to see if this class is mentioned.
+        var functionsToRun = qtest_results.functionsToRun
+        if (functionsToRun.length > 0) {
+            var found = false
+            var list = []
+            if (name.length > 0) {
+                var prefix = name + "::"
+                for (var index in functionsToRun) {
+                    if (functionsToRun[index].indexOf(prefix) == 0) {
+                        list.push(functionsToRun[index])
+                        found = true
+                    }
+                }
+            }
+            if (!found) {
+                completed = true
+                if (!TestLogger.log_complete_test(qtest_testId)) {
+                    qtest_results.stopLogging()
+                    Qt.quit()
+                }
+                qtest_results.testCaseName = ""
+                return
+            }
+            functionsToRun = list
+        }
+
         // Run the initTestCase function.
         qtest_results.functionName = "initTestCase"
         qtest_results.functionType = TestResult.InitFunc
@@ -402,10 +428,17 @@ Item {
             }
             testList.sort()
         }
+        var checkNames = (functionsToRun.length > 0)
         for (var index in testList) {
             var prop = testList[index]
             var datafunc = prop + "_data"
             var isBenchmark = (prop.indexOf("benchmark_") == 0)
+            if (checkNames) {
+                var index = functionsToRun.indexOf(name + "::" + prop)
+                if (index < 0)
+                    continue
+                functionsToRun.splice(index, 1)
+            }
             qtest_results.functionName = prop
             if (datafunc in testCase) {
                 qtest_results.functionType = TestResult.DataFunc
@@ -443,6 +476,10 @@ Item {
         qtest_results.functionName = "cleanupTestCase"
         qtest_results.functionType = TestResult.CleanupFunc
         qtest_runInternal("cleanupTestCase")
+
+        // Complain about missing functions that we were supposed to run.
+        if (functionsToRun.length > 0)
+            qtest_results.fail("Could not find functions: " + functionsToRun, "", 0)
 
         // Clean up and exit.
         running = false
@@ -494,10 +531,10 @@ Item {
                 var tail = prop.lastIndexOf("_data");
                 if (tail != -1 && tail == (prop.length - 5))
                     continue
+                // Note: cannot run functions in TestCase elements
+                // that lack a name.
                 if (name.length > 0)
                     testList.push(name + "::" + prop + "()")
-                else
-                    testList.push(prop + "()")
             }
             testList.sort()
             for (var index in testList)
