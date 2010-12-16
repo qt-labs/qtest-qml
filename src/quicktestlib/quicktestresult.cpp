@@ -398,7 +398,7 @@ void QuickTestResult::fail
 bool QuickTestResult::verify
     (bool success, const QString &message, const QString &file, int line)
 {
-    if (message.isEmpty()) {
+    if (!success && message.isEmpty()) {
         return QTestResult::verify
             (success, "verify()", "",
              qtest_fixFile(file).toLatin1().constData(), line);
@@ -414,12 +414,18 @@ bool QuickTestResult::compare
      const QString &val1, const QString &val2,
      const QString &file, int line)
 {
-    return QTestResult::compare
-        (success, message.toLocal8Bit().constData(),
-         QTest::toString(val1.toLatin1().constData()),
-         QTest::toString(val2.toLatin1().constData()),
-         "", "",
-         qtest_fixFile(file).toLatin1().constData(), line);
+    if (success) {
+        return QTestResult::compare
+            (success, message.toLocal8Bit().constData(),
+             qtest_fixFile(file).toLatin1().constData(), line);
+    } else {
+        return QTestResult::compare
+            (success, message.toLocal8Bit().constData(),
+             QTest::toString(val1.toLatin1().constData()),
+             QTest::toString(val2.toLatin1().constData()),
+             "", "",
+             qtest_fixFile(file).toLatin1().constData(), line);
+    }
 }
 
 void QuickTestResult::skipSingle

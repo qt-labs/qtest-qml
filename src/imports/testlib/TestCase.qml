@@ -135,8 +135,12 @@ Item {
         var act = qtest_formatValue(actual)
         var exp = qtest_formatValue(expected)
         var success = qtest_compareInternal(actual, expected)
-        if (msg === undefined)
-            msg = ""
+        if (msg === undefined) {
+            if (success)
+                msg = "COMPARE()"
+            else
+                msg = "Compared values are not the same"
+        }
         if (!qtest_results.compare(success, msg, act, exp, Qt.qtest_caller_file(), Qt.qtest_caller_line()))
             throw new Error("QtQuickTest::fail")
     }
