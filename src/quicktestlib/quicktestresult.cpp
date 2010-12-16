@@ -583,14 +583,14 @@ void QuickTestResult::stopBenchmark()
 }
 
 namespace QTest {
-    void qtest_qParseArgs(int argc, char *argv[]);
+    void qtest_qParseArgs(int argc, char *argv[], bool qml);
 };
 
 void QuickTestResult::parseArgs(int argc, char *argv[])
 {
     if (!QBenchmarkGlobalData::current)
         QBenchmarkGlobalData::current = &globalBenchmarkData;
-    QTest::qtest_qParseArgs(argc, argv);
+    QTest::qtest_qParseArgs(argc, argv, true);
 }
 
 void QuickTestResult::setProgramName(const char *name)
