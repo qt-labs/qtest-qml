@@ -100,10 +100,13 @@ Item {
 
     function qtest_compareInternal(actual, expected) {
         var success = false
+
         if (typeof actual == "number" && typeof expected == "number") {
             // Use a fuzzy compare if the two values are floats
             if (Math.abs(actual - expected) <= 0.00001)
                 success = true
+        } else if (Array.isArray(actual) && Array.isArray(expected)) {
+            success = qtest_compareInternalArrays(actual, expected)
         } else if (typeof actual == "object" && typeof expected == "object") {
             // Does the expected value look like a vector3d?
             if ("x" in expected && "y" in expected && "z" in expected) {
@@ -112,7 +115,7 @@ Item {
                         Math.abs(actual.z - expected.z) <= 0.00001) {
                     success = true
                 }
-            } else if (actual == expected) {
+            } else if (qtest_compareInternalObjects(actual, expected)) {
                 success = true
             }
         } else if (actual == expected) {
@@ -121,12 +124,57 @@ Item {
         return success
     }
 
+    // Test for equality any JavaScript type.
+    // Discussions and reference: http://philrathe.com/articles/equiv
+    // Test suites: http://philrathe.com/tests/equiv
+    // Author: Philippe Rathé <prathe@gmail.com>
+    function qtest_compareInternalObjects(a, b) {
+        var i;
+        var eq = true; // unless we can proove it
+        var aProperties = [], bProperties = []; // collection of strings
+
+        // comparing constructors is more strict than using instanceof
+        if (a.constructor !== b.constructor) {
+            return false;
+        }
+
+        for (i in a) { // be strict: don't ensures hasOwnProperty and go deep
+            aProperties.push(i); // collect a's properties
+            if (!qtest_compareInternal(a[i], b[i])) {
+                eq = false;
+            }
+        }
+
+        for (i in b) {
+            bProperties.push(i); // collect b's properties
+        }
+
+        // Ensures identical properties name
+        return eq && qtest_compareInternal(aProperties.sort(), bProperties.sort());
+
+    }
+
+    function qtest_compareInternalArrays(actual, expected) {
+        if (actual.length != expected.length) {
+            return false
+        }
+
+        for (var i = 0, len = actual.length; i < len; i++) {
+            if (!qtest_compareInternal(actual[i], expected[i])) {
+                return false
+            }
+        }
+
+        return true
+    }
+
     function qtest_formatValue(value) {
         if (typeof value == "object") {
             if ("x" in value && "y" in value && "z" in value) {
                 return "Qt.vector3d(" + value.x + ", " +
                        value.y + ", " + value.z + ")"
             }
+            return JSON.stringify(value)
         }
         return value
     }
