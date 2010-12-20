@@ -4,7 +4,7 @@
 ** All rights reserved.
 ** Contact: Nokia Corporation (qt-info@nokia.com)
 **
-** This file is part of the test suite of the Qt Toolkit.
+** This file is part of the QtTest module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** No Commercial Usage
@@ -39,38 +39,29 @@
 **
 ****************************************************************************/
 
-import Qt 4.7
-import QtQuickTest 1.0
+#ifndef QTESTOPTIONS_P_H
+#define QTESTOPTIONS_P_H
 
-TestCase {
-    name: "BasicTests"
+#include "qtest_global.h"
 
-    function test_pass() {
-        compare(2 + 2, 4, "2 + 2")
-    }
+#include <QtCore/qstring.h>
+#include <QtCore/qstringlist.h>
 
-    function test_fail() {
-        compare(2 + 2, 5, "2 + 2")
-    }
+QT_BEGIN_HEADER
 
-    function test_skip() {
-        skip("skipping")
-    }
+QT_BEGIN_NAMESPACE
 
-    function test_expecting() {
-        expectFail("", "this is the fail we wanted")
-        verify(false)
-    }
+QT_MODULE(Test)
 
-    function test_table_data() {
-        return [
-            {tag: "2 + 2 = 4", a: 2, b: 2, answer: 4 },
-            {tag: "2 + 6 = 8", a: 2, b: 6, answer: 8 },
-            {tag: "2 + 2 = 5", a: 2, b: 2, answer: 5 }, // fail
-        ]
-    }
+namespace QTest
+{
+    extern Q_TESTLIB_EXPORT bool printAvailableFunctions;
+    extern Q_TESTLIB_EXPORT QStringList testFunctions;
+    extern Q_TESTLIB_EXPORT QStringList testTags;
+};
 
-    function test_table(data) {
-        compare(data.a + data.b, data.answer)
-    }
-}
+QT_END_NAMESPACE
+
+QT_END_HEADER
+
+#endif

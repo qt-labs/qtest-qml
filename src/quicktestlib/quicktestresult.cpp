@@ -45,6 +45,7 @@
 #include "qtestresult_p.h"
 #include "qtesttable_p.h"
 #include "qtestlog_p.h"
+#include "qtestoptions_p.h"
 #include "qbenchmark.h"
 #include "qbenchmark_p.h"
 #include <QtCore/qset.h>
@@ -306,6 +307,16 @@ int QuickTestResult::skipCount() const
 }
 
 /*!
+    \qmlproperty list<string> TestResult::functionsToRun
+
+    This property returns the list of function names to be run.
+*/
+QStringList QuickTestResult::functionsToRun() const
+{
+    return QTest::testFunctions;
+}
+
+/*!
     \qmlmethod TestResult::reset()
 
     Resets all pass/fail/skip counters and prepare for testing.
@@ -398,7 +409,7 @@ void QuickTestResult::fail
 bool QuickTestResult::verify
     (bool success, const QString &message, const QString &file, int line)
 {
-    if (message.isEmpty()) {
+    if (!success && message.isEmpty()) {
         return QTestResult::verify
             (success, "verify()", "",
              qtest_fixFile(file).toLatin1().constData(), line);
@@ -414,12 +425,18 @@ bool QuickTestResult::compare
      const QString &val1, const QString &val2,
      const QString &file, int line)
 {
-    return QTestResult::compare
-        (success, message.toLocal8Bit().constData(),
-         QTest::toString(val1.toLatin1().constData()),
-         QTest::toString(val2.toLatin1().constData()),
-         "", "",
-         qtest_fixFile(file).toLatin1().constData(), line);
+    if (success) {
+        return QTestResult::compare
+            (success, message.toLocal8Bit().constData(),
+             qtest_fixFile(file).toLatin1().constData(), line);
+    } else {
+        return QTestResult::compare
+            (success, message.toLocal8Bit().constData(),
+             QTest::toString(val1.toLatin1().constData()),
+             QTest::toString(val2.toLatin1().constData()),
+             "", "",
+             qtest_fixFile(file).toLatin1().constData(), line);
+    }
 }
 
 void QuickTestResult::skipSingle
@@ -577,14 +594,14 @@ void QuickTestResult::stopBenchmark()
 }
 
 namespace QTest {
-    void qtest_qParseArgs(int argc, char *argv[]);
+    void qtest_qParseArgs(int argc, char *argv[], bool qml);
 };
 
 void QuickTestResult::parseArgs(int argc, char *argv[])
 {
     if (!QBenchmarkGlobalData::current)
         QBenchmarkGlobalData::current = &globalBenchmarkData;
-    QTest::qtest_qParseArgs(argc, argv);
+    QTest::qtest_qParseArgs(argc, argv, true);
 }
 
 void QuickTestResult::setProgramName(const char *name)

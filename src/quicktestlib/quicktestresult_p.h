@@ -45,6 +45,7 @@
 #include <QtQuickTest/quicktestglobal.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qstring.h>
+#include <QtCore/qstringlist.h>
 #include <QtCore/qscopedpointer.h>
 
 QT_BEGIN_NAMESPACE
@@ -65,6 +66,7 @@ class Q_QUICK_TEST_EXPORT QuickTestResult : public QObject
     Q_PROPERTY(int passCount READ passCount)
     Q_PROPERTY(int failCount READ failCount)
     Q_PROPERTY(int skipCount READ skipCount)
+    Q_PROPERTY(QStringList functionsToRun READ functionsToRun)
 public:
     QuickTestResult(QObject *parent = 0);
     ~QuickTestResult();
@@ -107,6 +109,8 @@ public:
     int passCount() const;
     int failCount() const;
     int skipCount() const;
+
+    QStringList functionsToRun() const;
 
 public Q_SLOTS:
     void reset();

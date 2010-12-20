@@ -52,6 +52,7 @@ TestCase {
         property string failmsg: "cleaned"
         property string actual: ""
         property string expected: ""
+        property variant functionsToRun: []
 
         function fail(msg, file, line) {
             failmsg = msg
@@ -208,7 +209,7 @@ TestCase {
             testCase.compare("abcdef", 42)
         } catch (e) {
             compare(e.message, "QtQuickTest::fail")
-            compare(functions.failmsg, "")
+            compare(functions.failmsg, "Compared values are not the same")
             compare(functions.actual, "abcdef")
             compare(functions.expected, "42")
             caught = true

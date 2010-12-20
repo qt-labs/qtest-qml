@@ -952,6 +952,10 @@ static bool isValidSlot(const QMetaMethod &sl)
     return true;
 }
 
+bool printAvailableFunctions = false;
+QStringList testFunctions;
+QStringList testTags;
+
 static void qPrintTestSlots()
 {
     for (int i = 0; i < QTest::currentTestObject->metaObject()->methodCount(); ++i) {
@@ -972,7 +976,7 @@ static int qToInt(char *str)
     return l;
 }
 
-void qtest_qParseArgs(int argc, char *argv[])
+void qtest_qParseArgs(int argc, char *argv[], bool qml)
 {
     lastTestFuncIdx = -1;
 
@@ -1021,8 +1025,12 @@ void qtest_qParseArgs(int argc, char *argv[])
                    "%s", argv[0], testOptions);
             exit(0);
         } else if (strcmp(argv[i], "-functions") == 0) {
-            qPrintTestSlots();
-            exit(0);
+            if (qml) {
+                QTest::printAvailableFunctions = true;
+            } else {
+                qPrintTestSlots();
+                exit(0);
+            }
         } else if(strcmp(argv[i], "-xunitxml") == 0){
             QTestLog::setLogMode(QTestLog::XunitXML);
         } else if (strcmp(argv[i], "-xml") == 0) {
@@ -1142,6 +1150,32 @@ void qtest_qParseArgs(int argc, char *argv[])
         } else if (argv[i][0] == '-') {
             printf("Unknown option: '%s'\n\n%s", argv[i], testOptions);
             exit(1);
+        } else if (qml) {
+            // We can't check the availability of test functions until
+            // we load the QML files.  So just store the data for now.
+            int colon = -1;
+            int off;
+            for(off = 0; *(argv[i]+off); ++off) {
+                if (*(argv[i]+off) == ':') {
+                    if (*(argv[i]+off+1) == ':') {
+                        // "::" is used as a test name separator.
+                        // e.g. "ClickTests::test_click:row1".
+                        ++off;
+                    } else {
+                        colon = off;
+                        break;
+                    }
+                }
+            }
+            if (colon == -1) {
+                QTest::testFunctions += QString::fromLatin1(argv[i]);
+                QTest::testTags += QString();
+            } else {
+                QTest::testFunctions +=
+                    QString::fromLatin1(argv[i], colon);
+                QTest::testTags +=
+                    QString::fromLatin1(argv[i] + colon + 1);
+            }
         } else {
             int colon = -1;
             char buf[512], *data=0;
@@ -1691,7 +1725,7 @@ int QTest::qExec(QObject *testObject, int argc, char **argv)
     QTEST_ASSERT(metaObject);
 
     QTestResult::setCurrentTestObject(metaObject->className());
-    qtest_qParseArgs(argc, argv);
+    qtest_qParseArgs(argc, argv, false);
 #ifdef QTESTLIB_USE_VALGRIND
     if (QBenchmarkGlobalData::current->mode() == QBenchmarkGlobalData::CallgrindParentProcess) {
         const QStringList origAppArgs(QCoreApplication::arguments());
