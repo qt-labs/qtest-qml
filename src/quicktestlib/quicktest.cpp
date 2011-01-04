@@ -139,7 +139,7 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     if (testPath.isEmpty() && sourceDir)
         testPath = QString::fromLocal8Bit(sourceDir);
     if (testPath.isEmpty())
-        testPath = QLatin1String(":/");
+        testPath = QLatin1String(".");
 
     // Scan the test data directory recursively, looking for "tst_*.qml" files.
     QStringList filters;
@@ -150,21 +150,6 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
                       QDirIterator::FollowSymlinks);
     while (iter.hasNext())
         files += iter.next();
-    if (testPath == QLatin1String(":/")) {
-        if (files.isEmpty()) {
-            // No QML tests in the program resources - search "." instead.
-            testPath = QLatin1String(".");
-            QDirIterator iter(testPath, filters, QDir::Files,
-                              QDirIterator::Subdirectories |
-                              QDirIterator::FollowSymlinks);
-            while (iter.hasNext())
-                files += iter.next();
-        } else {
-            qWarning() << argv[0]
-                       << ": test cases in resources are deprecated and will "
-                          "be removed soon";
-        }
-    }
     files.sort();
 
     // Bail out if we didn't find any test cases.
