@@ -260,7 +260,11 @@ Item {
                 return "Qt.vector3d(" + value.x + ", " +
                        value.y + ", " + value.z + ")"
             }
-            return JSON.stringify(value)
+            try {
+                return JSON.stringify(value)
+            } catch (ex) {
+                // stringify might fail (e.g. due to circular references)
+            }
         }
         return value
     }
