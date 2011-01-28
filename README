@@ -4,7 +4,7 @@ QtQuickTest module for Qt Quick
 
 This directory contains an experimental module and test harness
 for writing QTestLib-style unit tests in QML.  Build it against
-Qt 4.7 as follows:
+Qt 4.7.1 as follows:
 
     $ /path/to/qt/bin/qmake qtest-qml.pro
     $ make
