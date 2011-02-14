@@ -41,15 +41,21 @@
 
 #include "quicktestevent_p.h"
 #include "qtestkeyboard.h"
+#include <QtDeclarative/qdeclarative.h>
+#include <QtDeclarative/qdeclarativeitem.h>
+#include <QtDeclarative/qdeclarativeview.h>
+#if defined(QML_VERSION) && QML_VERSION >= 0x020000
+#include <QtDeclarative/qsgitem.h>
+#include <QtDeclarative/qsgcanvas.h>
+#define QUICK_TEST_SCENEGRAPH 1
+#endif
 #include <QtGui/qgraphicsscene.h>
-#include <QtGui/qgraphicsview.h>
 
 QT_BEGIN_NAMESPACE
 
-QuickTestEvent::QuickTestEvent(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)
+QuickTestEvent::QuickTestEvent(QObject *parent)
+    : QObject(parent)
 {
-    setVisible(false);
 }
 
 QuickTestEvent::~QuickTestEvent()
@@ -91,8 +97,8 @@ namespace QtQuickTest
 {
     enum MouseAction { MousePress, MouseRelease, MouseClick, MouseDoubleClick, MouseMove };
 
-    static void mouseEvent(MouseAction action, QGraphicsView *widget,
-                           QDeclarativeItem *item, Qt::MouseButton button,
+    static void mouseEvent(MouseAction action, QWidget *widget,
+                           QObject *item, Qt::MouseButton button,
                            Qt::KeyboardModifiers stateKey, QPointF _pos, int delay=-1)
     {
         QTEST_ASSERT(widget);
@@ -109,7 +115,24 @@ namespace QtQuickTest
             return;
         }
 
-        QPoint pos = widget->mapFromScene(item->mapToScene(_pos));
+        QPoint pos;
+        QDeclarativeView *view = qobject_cast<QDeclarativeView *>(widget);
+        QWidget *eventWidget = widget;
+#ifdef QUICK_TEST_SCENEGRAPH
+        QSGItem *sgitem = qobject_cast<QSGItem *>(item);
+        if (sgitem) {
+            pos = sgitem->mapToScene(_pos).toPoint();
+        } else
+#endif
+        {
+            QDeclarativeItem *ditem = qobject_cast<QDeclarativeItem *>(item);
+            if (!ditem) {
+                qWarning("Mouse event target is not an Item");
+                return;
+            }
+            pos = view->mapFromScene(ditem->mapToScene(_pos));
+            eventWidget = view->viewport();
+        }
 
         QTEST_ASSERT(button == Qt::NoButton || button & Qt::MouseButtonMask);
         QTEST_ASSERT(stateKey == 0 || stateKey & Qt::KeyboardModifierMask);
@@ -136,7 +159,7 @@ namespace QtQuickTest
                 QTEST_ASSERT(false);
         }
         QSpontaneKeyEvent::setSpontaneous(&me);
-        if (!qApp->notify(widget->viewport(), &me)) {
+        if (!qApp->notify(eventWidget, &me)) {
             static const char *mouseActionNames[] =
                 { "MousePress", "MouseRelease", "MouseClick", "MouseDoubleClick", "MouseMove" };
             QString warning = QString::fromLatin1("Mouse event \"%1\" not accepted by receiving widget");
@@ -146,10 +169,10 @@ namespace QtQuickTest
 };
 
 bool QuickTestEvent::mousePress
-    (QDeclarativeItem *item, qreal x, qreal y, int button,
+    (QObject *item, qreal x, qreal y, int button,
      int modifiers, int delay)
 {
-    QGraphicsView *view = qobject_cast<QGraphicsView *>(eventWidget());
+    QWidget *view = eventWidget();
     if (!view)
         return false;
     QtQuickTest::mouseEvent(QtQuickTest::MousePress, view, item,
@@ -160,10 +183,10 @@ bool QuickTestEvent::mousePress
 }
 
 bool QuickTestEvent::mouseRelease
-    (QDeclarativeItem *item, qreal x, qreal y, int button,
+    (QObject *item, qreal x, qreal y, int button,
      int modifiers, int delay)
 {
-    QGraphicsView *view = qobject_cast<QGraphicsView *>(eventWidget());
+    QWidget *view = eventWidget();
     if (!view)
         return false;
     QtQuickTest::mouseEvent(QtQuickTest::MouseRelease, view, item,
@@ -174,10 +197,10 @@ bool QuickTestEvent::mouseRelease
 }
 
 bool QuickTestEvent::mouseClick
-    (QDeclarativeItem *item, qreal x, qreal y, int button,
+    (QObject *item, qreal x, qreal y, int button,
      int modifiers, int delay)
 {
-    QGraphicsView *view = qobject_cast<QGraphicsView *>(eventWidget());
+    QWidget *view = eventWidget();
     if (!view)
         return false;
     QtQuickTest::mouseEvent(QtQuickTest::MouseClick, view, item,
@@ -188,10 +211,10 @@ bool QuickTestEvent::mouseClick
 }
 
 bool QuickTestEvent::mouseDoubleClick
-    (QDeclarativeItem *item, qreal x, qreal y, int button,
+    (QObject *item, qreal x, qreal y, int button,
      int modifiers, int delay)
 {
-    QGraphicsView *view = qobject_cast<QGraphicsView *>(eventWidget());
+    QWidget *view = eventWidget();
     if (!view)
         return false;
     QtQuickTest::mouseEvent(QtQuickTest::MouseDoubleClick, view, item,
@@ -202,9 +225,9 @@ bool QuickTestEvent::mouseDoubleClick
 }
 
 bool QuickTestEvent::mouseMove
-    (QDeclarativeItem *item, qreal x, qreal y, int delay)
+    (QObject *item, qreal x, qreal y, int delay)
 {
-    QGraphicsView *view = qobject_cast<QGraphicsView *>(eventWidget());
+    QWidget *view = eventWidget();
     if (!view)
         return false;
     QtQuickTest::mouseEvent(QtQuickTest::MouseMove, view, item,
@@ -215,7 +238,15 @@ bool QuickTestEvent::mouseMove
 
 QWidget *QuickTestEvent::eventWidget()
 {
-    QGraphicsScene *s = scene();
+#ifdef QUICK_TEST_SCENEGRAPH
+    QSGItem *sgitem = qobject_cast<QSGItem *>(parent());
+    if (sgitem)
+        return sgitem->canvas();
+#endif
+    QDeclarativeItem *item = qobject_cast<QDeclarativeItem *>(parent());
+    if (!item)
+        return 0;
+    QGraphicsScene *s = item->scene();
     if (!s)
         return 0;
     QList<QGraphicsView *> views = s->views();

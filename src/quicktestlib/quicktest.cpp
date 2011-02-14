@@ -48,6 +48,10 @@
 #include <QtDeclarative/qdeclarativeview.h>
 #include <QtDeclarative/qdeclarativeengine.h>
 #include <QtDeclarative/qdeclarativecontext.h>
+#if defined(QML_VERSION) && QML_VERSION >= 0x020000
+#include <QtDeclarative/qsgview.h>
+#define QUICK_TEST_SCENEGRAPH 1
+#endif
 #include <QtScript/qscriptvalue.h>
 #include <QtScript/qscriptcontext.h>
 #include <QtScript/qscriptengine.h>
@@ -112,8 +116,10 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     // Look for QML-specific command-line options.
     //      -import dir         Specify an import directory.
     //      -input dir          Specify the input directory for test cases.
+    //      -qtquick2           Run with QtQuick 2 rather than QtQuick 1.
     QStringList imports;
     QString testPath;
+    bool qtQuick2 = false;
     int outargc = 1;
     int index = 1;
     while (index < argc) {
@@ -124,6 +130,9 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
             testPath = stripQuotes(QString::fromLocal8Bit(argv[index + 1]));
             index += 2;
         } else if (strcmp(argv[index], "-opengl") == 0) {
+            ++index;
+        } else if (strcmp(argv[index], "-qtquick2") == 0) {
+            qtQuick2 = true;
             ++index;
         } else if (outargc != index) {
             argv[outargc++] = argv[index++];
@@ -165,66 +174,132 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
 
     // Scan through all of the "tst_*.qml" files and run each of them
     // in turn with a QDeclarativeView.
-    foreach (QString file, files) {
-        QFileInfo fi(file);
-        if (!fi.exists())
-            continue;
-        QDeclarativeView view;
-        QTestRootObject rootobj;
-        QEventLoop eventLoop;
-        QObject::connect(view.engine(), SIGNAL(quit()),
-                         &rootobj, SLOT(quit()));
-        QObject::connect(view.engine(), SIGNAL(quit()),
-                         &eventLoop, SLOT(quit()));
-        if (createViewport)
-            view.setViewport((*createViewport)());
-        view.rootContext()->setContextProperty
-            (QLatin1String("qtest"), &rootobj);
-        QScriptEngine *engine;
-        engine = QDeclarativeDebugHelper::getScriptEngine(view.engine());
-        QScriptValue qtObject
-            = engine->globalObject().property(QLatin1String("Qt"));
-        qtObject.setProperty
-            (QLatin1String("qtest_wrapper"), QScriptValue(true));
-        qtObject.setProperty
-            (QLatin1String("qtest_printAvailableFunctions"),
-             QScriptValue(QTest::printAvailableFunctions));
-        foreach (QString path, imports)
-            view.engine()->addImportPath(path);
-        QString path = fi.absoluteFilePath();
-        if (path.startsWith(QLatin1String(":/")))
-            view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
-        else
-            view.setSource(QUrl::fromLocalFile(path));
-        if (QTest::printAvailableFunctions)
-            continue;
-        if (view.status() == QDeclarativeView::Error) {
-            // Error compiling the test - flag failure in the log and continue.
-            QList<QDeclarativeError> errors = view.errors();
-            QuickTestResult results;
-            results.setTestCaseName(fi.baseName());
-            results.startLogging();
-            results.setFunctionName(QLatin1String("compile"));
-            results.setFunctionType(QuickTestResult::Func);
-            results.fail(errors.at(0).description(),
-                         errors.at(0).url().toString(),
-                         errors.at(0).line());
-            results.finishTestFunction();
-            results.setFunctionName(QString());
-            results.setFunctionType(QuickTestResult::NoWhere);
-            results.stopLogging();
-            continue;
+#ifdef QUICK_TEST_SCENEGRAPH
+    if (qtQuick2) {
+        foreach (QString file, files) {
+            QFileInfo fi(file);
+            if (!fi.exists())
+                continue;
+            QSGView view;
+            QTestRootObject rootobj;
+            QEventLoop eventLoop;
+            QObject::connect(view.engine(), SIGNAL(quit()),
+                             &rootobj, SLOT(quit()));
+            QObject::connect(view.engine(), SIGNAL(quit()),
+                             &eventLoop, SLOT(quit()));
+            view.rootContext()->setContextProperty
+                (QLatin1String("qtest"), &rootobj);
+            QScriptEngine *engine;
+            engine = QDeclarativeDebugHelper::getScriptEngine(view.engine());
+            QScriptValue qtObject
+                = engine->globalObject().property(QLatin1String("Qt"));
+            qtObject.setProperty
+                (QLatin1String("qtest_wrapper"), QScriptValue(true));
+            qtObject.setProperty
+                (QLatin1String("qtest_printAvailableFunctions"),
+                 QScriptValue(QTest::printAvailableFunctions));
+            foreach (QString path, imports)
+                view.engine()->addImportPath(path);
+            QString path = fi.absoluteFilePath();
+            if (path.startsWith(QLatin1String(":/")))
+                view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
+            else
+                view.setSource(QUrl::fromLocalFile(path));
+            if (QTest::printAvailableFunctions)
+                continue;
+            if (view.status() == QSGView::Error) {
+                // Error compiling the test - flag failure in the log and continue.
+                QList<QDeclarativeError> errors = view.errors();
+                QuickTestResult results;
+                results.setTestCaseName(fi.baseName());
+                results.startLogging();
+                results.setFunctionName(QLatin1String("compile"));
+                results.setFunctionType(QuickTestResult::Func);
+                results.fail(errors.at(0).description(),
+                             errors.at(0).url().toString(),
+                             errors.at(0).line());
+                results.finishTestFunction();
+                results.setFunctionName(QString());
+                results.setFunctionType(QuickTestResult::NoWhere);
+                results.stopLogging();
+                continue;
+            }
+            if (!rootobj.hasQuit) {
+                // If the test already quit, then it was performed
+                // synchronously during setSource().  Otherwise it is
+                // an asynchronous test and we need to show the window
+                // and wait for the quit indication.
+                view.show();
+                QTest::qWaitForWindowShown(&view);
+                rootobj.setWindowShown(true);
+                if (!rootobj.hasQuit)
+                    eventLoop.exec();
+            }
         }
-        if (!rootobj.hasQuit) {
-            // If the test already quit, then it was performed
-            // synchronously during setSource().  Otherwise it is
-            // an asynchronous test and we need to show the window
-            // and wait for the quit indication.
-            view.show();
-            QTest::qWaitForWindowShown(&view);
-            rootobj.setWindowShown(true);
-            if (!rootobj.hasQuit)
-                eventLoop.exec();
+    } else
+#endif
+    {
+        foreach (QString file, files) {
+            QFileInfo fi(file);
+            if (!fi.exists())
+                continue;
+            QDeclarativeView view;
+            QTestRootObject rootobj;
+            QEventLoop eventLoop;
+            QObject::connect(view.engine(), SIGNAL(quit()),
+                             &rootobj, SLOT(quit()));
+            QObject::connect(view.engine(), SIGNAL(quit()),
+                             &eventLoop, SLOT(quit()));
+            if (createViewport)
+                view.setViewport((*createViewport)());
+            view.rootContext()->setContextProperty
+                (QLatin1String("qtest"), &rootobj);
+            QScriptEngine *engine;
+            engine = QDeclarativeDebugHelper::getScriptEngine(view.engine());
+            QScriptValue qtObject
+                = engine->globalObject().property(QLatin1String("Qt"));
+            qtObject.setProperty
+                (QLatin1String("qtest_wrapper"), QScriptValue(true));
+            qtObject.setProperty
+                (QLatin1String("qtest_printAvailableFunctions"),
+                 QScriptValue(QTest::printAvailableFunctions));
+            foreach (QString path, imports)
+                view.engine()->addImportPath(path);
+            QString path = fi.absoluteFilePath();
+            if (path.startsWith(QLatin1String(":/")))
+                view.setSource(QUrl(QLatin1String("qrc:") + path.mid(2)));
+            else
+                view.setSource(QUrl::fromLocalFile(path));
+            if (QTest::printAvailableFunctions)
+                continue;
+            if (view.status() == QDeclarativeView::Error) {
+                // Error compiling the test - flag failure in the log and continue.
+                QList<QDeclarativeError> errors = view.errors();
+                QuickTestResult results;
+                results.setTestCaseName(fi.baseName());
+                results.startLogging();
+                results.setFunctionName(QLatin1String("compile"));
+                results.setFunctionType(QuickTestResult::Func);
+                results.fail(errors.at(0).description(),
+                             errors.at(0).url().toString(),
+                             errors.at(0).line());
+                results.finishTestFunction();
+                results.setFunctionName(QString());
+                results.setFunctionType(QuickTestResult::NoWhere);
+                results.stopLogging();
+                continue;
+            }
+            if (!rootobj.hasQuit) {
+                // If the test already quit, then it was performed
+                // synchronously during setSource().  Otherwise it is
+                // an asynchronous test and we need to show the window
+                // and wait for the quit indication.
+                view.show();
+                QTest::qWaitForWindowShown(&view);
+                rootobj.setWindowShown(true);
+                if (!rootobj.hasQuit)
+                    eventLoop.exec();
+            }
         }
     }
 

@@ -43,15 +43,15 @@
 #define QUICKTESTEVENT_P_H
 
 #include <QtQuickTest/quicktestglobal.h>
-#include <QtDeclarative/qdeclarativeitem.h>
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_QUICK_TEST_EXPORT QuickTestEvent : public QDeclarativeItem
+class Q_QUICK_TEST_EXPORT QuickTestEvent : public QObject
 {
     Q_OBJECT
 public:
-    QuickTestEvent(QDeclarativeItem *parent = 0);
+    QuickTestEvent(QObject *parent = 0);
     ~QuickTestEvent();
 
 public Q_SLOTS:
@@ -59,15 +59,15 @@ public Q_SLOTS:
     bool keyRelease(int key, int modifiers, int delay);
     bool keyClick(int key, int modifiers, int delay);
 
-    bool mousePress(QDeclarativeItem *item, qreal x, qreal y, int button,
+    bool mousePress(QObject *item, qreal x, qreal y, int button,
                     int modifiers, int delay);
-    bool mouseRelease(QDeclarativeItem *item, qreal x, qreal y, int button,
+    bool mouseRelease(QObject *item, qreal x, qreal y, int button,
                       int modifiers, int delay);
-    bool mouseClick(QDeclarativeItem *item, qreal x, qreal y, int button,
+    bool mouseClick(QObject *item, qreal x, qreal y, int button,
                     int modifiers, int delay);
-    bool mouseDoubleClick(QDeclarativeItem *item, qreal x, qreal y, int button,
+    bool mouseDoubleClick(QObject *item, qreal x, qreal y, int button,
                           int modifiers, int delay);
-    bool mouseMove(QDeclarativeItem *item, qreal x, qreal y, int delay);
+    bool mouseMove(QObject *item, qreal x, qreal y, int delay);
 
 private:
     QWidget *eventWidget();

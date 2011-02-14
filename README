@@ -19,3 +19,12 @@ shows how to integrate QML unit tests into a qmake-based build system.
 You can also run "make check" to verify that the example tests pass
 correctly, and "make docs" to generate the HTML documentation under
 "doc/html" using the qdoc3 tool from Qt.
+
+Running QtQuickTest with Qt Quick 2.0
+=====================================
+
+By default, test cases are run using QDeclarativeView.  To switch to
+QSGView instead, build against a version of Qt that has scenegraph
+support and then run the unit tests as follows:
+
+    $ QMLSCENE_IMPORT_NAME=quick1 TESTARGS=-qtquick2 make check
