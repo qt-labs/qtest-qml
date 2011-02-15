@@ -1,0 +1,2 @@
+include(qtquicktest-project.qdocconf)
+include(qt-html-templates.qdocconf)

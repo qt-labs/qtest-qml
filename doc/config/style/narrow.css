@@ -6,7 +6,7 @@
     }
 
     .narrow a {
-      color: #44a51c;
+      color: #00732f;
     }
 
     .narrow .header, .narrow .header .content, .narrow .footer, .narrow .wrapper {
@@ -15,7 +15,12 @@
     }
 
     .narrow .footer {
-      margin: 0;
+      margin: 0px;
+    }
+
+    .creator .header, .creator .header .content, .creator .footer, .creator .wrapper {
+      margin: 0px;
+      min-width: 300px;
     }
     .narrow .header
     {
@@ -40,7 +45,7 @@
     {
       width: auto;
       height: auto;
-      color: #363534;
+      color: #00732f;
       position: static;
       float: left;
       margin-left: 25px;
@@ -49,13 +54,14 @@
 
     .narrow .header .qtref a
     {
-      color: #363534;
+      color: #00732F;
     }
 
     .narrow .header .qtref span
     {
       background-image: none;
       text-indent: 0;
+        width: 260px;
     }
 
     .narrow .header #nav-topright
@@ -98,7 +104,7 @@
     }
     .narrow .header #shortCut ul li a
     {
-      color: #44a51c;
+      color: #00732F;
     }
 
     .narrow .wrapper .hd
@@ -126,6 +132,11 @@
         margin: 0 5px 0 5px;
     }
 
+    .creator .wrap
+    {
+        margin: 0px;
+        background:#FFFFFF;
+    }
     .narrow .wrap .toolbar
     {
       border-bottom: none;
@@ -135,7 +146,14 @@
     {
         padding-top: 15px;
     }
-
+    .creator .wrap .content
+    {
+        padding-top: 10px;
+    }
+    .creator .wrap .content .guide
+    {
+        padding-top: 15px;
+    }
     .narrow .wrap .feedback
     {
         display: none;
@@ -146,13 +164,13 @@
     }
 
     .narrow .wrap .breadcrumb ul li a {
-      color: #44a51c;
+      color: #00732f;
     }
 
     .narrow .wrap .breadcrumb ul li.last a {
       color: #363534;
     }
-    
+
     #narrowsearch {
       display: none;
     }
@@ -187,7 +205,6 @@
       *height: 17px;
       _height: 18px;
     }
-
     .narrow .indexbox .indexIcon {
       display: none;
     }
@@ -196,7 +213,7 @@
       width: 64%;
       padding-left: 0;
     }
-    
+
     .narrow .indexboxcont .sectionlist {
       width: 32.5%;
     }
@@ -206,6 +223,7 @@
       float: right;
       margin: 15px 40px 0 0;
       font-size: 11px;
+      position: relative;
     }
 
     .narrow #narrowmenu {
@@ -235,7 +253,7 @@
     #narrowmenu li,
     #narrowmenu li ul {
       background-color: #fff;
-	  margin-top:-1px;
+      margin-top:-1px;
     }
 
     #narrowmenu li ul {
@@ -248,3 +266,6 @@
     }
 
     /* end narrow mode */
+    .creator #narrowsearch, .creator #narrowmenu{
+        display:none;
+    }
