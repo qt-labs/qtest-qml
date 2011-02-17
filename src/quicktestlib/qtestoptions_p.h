@@ -42,7 +42,7 @@
 #ifndef QTESTOPTIONS_P_H
 #define QTESTOPTIONS_P_H
 
-#include "qtest_global.h"
+#include <QtTest/qtest_global.h>
 
 #include <QtCore/qstring.h>
 #include <QtCore/qstringlist.h>

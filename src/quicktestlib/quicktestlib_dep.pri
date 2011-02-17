@@ -1,5 +1,5 @@
 
-QT += declarative
+QT += declarative testlib
 
 INCLUDEPATH += $$PWD
 LIBS += -L../../lib -L../../bin

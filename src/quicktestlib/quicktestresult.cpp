@@ -40,14 +40,14 @@
 ****************************************************************************/
 
 #include "quicktestresult_p.h"
-#include "qtestcase.h"
-#include "qtestsystem.h"
-#include "qtestresult_p.h"
-#include "qtesttable_p.h"
-#include "qtestlog_p.h"
+#include <QtTest/qtestcase.h>
+#include <QtTest/qtestsystem.h>
+#include <QtTest/private/qtestresult_p.h>
+#include <QtTest/private/qtesttable_p.h>
+#include <QtTest/private/qtestlog_p.h>
 #include "qtestoptions_p.h"
-#include "qbenchmark.h"
-#include "qbenchmark_p.h"
+#include <QtTest/qbenchmark.h>
+#include <QtTest/private/qbenchmark_p.h>
 #include <QtCore/qset.h>
 #include <QtCore/qmap.h>
 #include <QtCore/qbytearray.h>

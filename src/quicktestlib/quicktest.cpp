@@ -41,7 +41,7 @@
 
 #include "quicktest.h"
 #include "quicktestresult_p.h"
-#include "qtestsystem.h"
+#include <QtTest/qtestsystem.h>
 #include "qtestoptions_p.h"
 #include <QApplication>
 #include <QtDeclarative/qdeclarative.h>

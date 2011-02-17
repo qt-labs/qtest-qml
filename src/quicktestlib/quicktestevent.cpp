@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include "quicktestevent_p.h"
-#include "qtestkeyboard.h"
+#include <QtTest/qtestkeyboard.h>
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeitem.h>
 #include <QtDeclarative/qdeclarativeview.h>
