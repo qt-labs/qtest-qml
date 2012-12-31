@@ -68,6 +68,9 @@ Item {
     // both qmlviewer and the QtQuickTest module test wrapper.
     property bool windowShown: Qt.qtest_wrapper ? qtest.windowShown : false
 
+    // The number of pixels movement needed to initiate a drag operation
+    property alias startDragDistance: qtest_events_normal.startDragDistance
+
     // Internal private state.  Identifiers prefixed with qtest are reserved.
     property bool qtest_prevWhen: true
     property int qtest_testId: -1
@@ -410,6 +413,23 @@ Item {
             qtest_fail("window not shown", 2)
     }
 
+    function mouseDrag(item, x, y, dx, dy, button, modifiers, delay) {
+        if (item.x === undefined || item.y === undefined)
+            return
+        if (button === undefined)
+            button = Qt.LeftButton
+        if (modifiers === undefined)
+            modifiers = Qt.NoModifier
+        if (delay == undefined)
+            delay = -1
+
+        mousePress(item, x, y, button, modifiers, delay)
+        //trigger dragging (QML requires drag to exceed the QApplication value, not just reach it)
+        var dragDistance = startDragDistance + 1
+        mouseMove(item, x + dragDistance, y + dragDistance, delay, button)
+        mouseMove(item, x + dx, y + dy, delay, button)
+    }
+
     function mouseClick(item, x, y, button, modifiers, delay) {
         if (button === undefined)
             button = Qt.LeftButton
@@ -432,10 +452,12 @@ Item {
             qtest_fail("window not shown", 2)
     }
 
-    function mouseMove(item, x, y, delay) {
+    function mouseMove(item, x, y, delay, buttons) {
         if (delay == undefined)
             delay = -1
-        if (!qtest_events.mouseMove(item, x, y, delay))
+        if (buttons == undefined)
+            buttons = Qt.NoButton
+        if (!qtest_events.mouseMove(item, x, y, delay, buttons))
             qtest_fail("window not shown", 2)
     }
 

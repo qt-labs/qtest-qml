@@ -50,9 +50,12 @@ QT_BEGIN_NAMESPACE
 class Q_QUICK_TEST_EXPORT QuickTestEvent : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int startDragDistance READ startDragDistance)
 public:
     QuickTestEvent(QObject *parent = 0);
     ~QuickTestEvent();
+
+    static int startDragDistance();
 
 public Q_SLOTS:
     bool keyPress(int key, int modifiers, int delay);
@@ -67,7 +70,7 @@ public Q_SLOTS:
                     int modifiers, int delay);
     bool mouseDoubleClick(QObject *item, qreal x, qreal y, int button,
                           int modifiers, int delay);
-    bool mouseMove(QObject *item, qreal x, qreal y, int delay);
+    bool mouseMove(QObject *item, qreal x, qreal y, int delay, int buttons);
 
 private:
     QWidget *eventWidget();

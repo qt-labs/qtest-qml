@@ -62,6 +62,11 @@ QuickTestEvent::~QuickTestEvent()
 {
 }
 
+int QuickTestEvent::startDragDistance()
+{
+    return qApp->startDragDistance();
+}
+
 bool QuickTestEvent::keyPress(int key, int modifiers, int delay)
 {
     QWidget *widget = eventWidget();
@@ -152,9 +157,15 @@ namespace QtQuickTest
                 me = QMouseEvent(QEvent::MouseButtonDblClick, pos, widget->mapToGlobal(pos), button, button, stateKey);
                 break;
             case MouseMove:
-                QCursor::setPos(widget->mapToGlobal(pos));
-                qApp->processEvents();
-                return;
+                if (button == Qt::NoButton) {
+                    // If we send a mouse move event with no button pressed, it will be
+                    // rejected (unless mouseTracking is set to true); simulate instead
+                    QCursor::setPos(widget->mapToGlobal(pos));
+                    qApp->processEvents();
+                } else {
+                    me = QMouseEvent(QEvent::MouseMove, pos, widget->mapToGlobal(pos), button, button, stateKey);
+                }
+                break;
             default:
                 QTEST_ASSERT(false);
         }
@@ -225,13 +236,14 @@ bool QuickTestEvent::mouseDoubleClick
 }
 
 bool QuickTestEvent::mouseMove
-    (QObject *item, qreal x, qreal y, int delay)
+    (QObject *item, qreal x, qreal y, int delay, int buttons)
 {
     QWidget *view = eventWidget();
     if (!view)
         return false;
+
     QtQuickTest::mouseEvent(QtQuickTest::MouseMove, view, item,
-                            Qt::NoButton, Qt::NoModifier,
+                            Qt::MouseButton(buttons), Qt::NoModifier,
                             QPointF(x, y), delay);
     return true;
 }
@@ -247,6 +259,10 @@ QWidget *QuickTestEvent::eventWidget()
     if (!item)
         return 0;
     QGraphicsScene *s = item->scene();
+    while (!s && item) {
+        item = qobject_cast<QDeclarativeItem *>(item->parent());
+        s = item->scene();
+    }
     if (!s)
         return 0;
     QList<QGraphicsView *> views = s->views();
