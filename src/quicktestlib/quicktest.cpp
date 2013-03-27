@@ -111,7 +111,8 @@ static inline QString stripQuotes(const QString &s)
 
 int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport_create createViewport, const char *sourceDir)
 {
-    QApplication app(argc, argv);
+    // qApp might be already created in main application which is using quicktestlib
+    QScopedPointer<QApplication> app(qApp ? qApp : new QApplication(argc, argv));
 
     // Look for QML-specific command-line options.
     //      -import dir         Specify an import directory.
