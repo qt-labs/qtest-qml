@@ -63,6 +63,7 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qeventloop.h>
+#include <QtCore/qtranslator.h>
 #include <QtGui/qtextdocument.h>
 #include <stdio.h>
 
@@ -117,8 +118,10 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     // Look for QML-specific command-line options.
     //      -import dir         Specify an import directory.
     //      -input dir          Specify the input directory for test cases.
+    //      -translation file   Specify a .qm file to load
     //      -qtquick2           Run with QtQuick 2 rather than QtQuick 1.
     QStringList imports;
+    QStringList qmfiles;
     QString testPath;
     bool qtQuick2 = false;
     int outargc = 1;
@@ -135,6 +138,9 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
         } else if (strcmp(argv[index], "-qtquick2") == 0) {
             qtQuick2 = true;
             ++index;
+        } else if (strcmp(argv[index], "-translation") == 0) {
+            qmfiles += stripQuotes(QString::fromLocal8Bit(argv[index + 1]));
+            index += 2;
         } else if (outargc != index) {
             argv[outargc++] = argv[index++];
         } else {
@@ -172,6 +178,16 @@ int quick_test_main(int argc, char **argv, const char *name, quick_test_viewport
     // Parse the command-line arguments.
     QuickTestResult::parseArgs(argc, argv);
     QuickTestResult::setProgramName(name);
+
+    // Load all the translations in the order they were given in the args
+    foreach (QString qmfile, qmfiles) {
+        QTranslator *translator = new QTranslator(qApp);
+        if (translator->load(qmfile)) {
+            qApp->installTranslator(translator);
+        } else {
+            qWarning() << "Could not load the translation file" << qmfile;
+        }
+    }
 
     // Scan through all of the "tst_*.qml" files and run each of them
     // in turn with a QDeclarativeView.
