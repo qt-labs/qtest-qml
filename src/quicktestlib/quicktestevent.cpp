@@ -44,11 +44,6 @@
 #include <QtDeclarative/qdeclarative.h>
 #include <QtDeclarative/qdeclarativeitem.h>
 #include <QtDeclarative/qdeclarativeview.h>
-#if defined(QML_VERSION) && QML_VERSION >= 0x020000
-#include <QtDeclarative/qsgitem.h>
-#include <QtDeclarative/qsgcanvas.h>
-#define QUICK_TEST_SCENEGRAPH 1
-#endif
 #include <QtGui/qgraphicsscene.h>
 
 QT_BEGIN_NAMESPACE
@@ -123,21 +118,13 @@ namespace QtQuickTest
         QPoint pos;
         QDeclarativeView *view = qobject_cast<QDeclarativeView *>(widget);
         QWidget *eventWidget = widget;
-#ifdef QUICK_TEST_SCENEGRAPH
-        QSGItem *sgitem = qobject_cast<QSGItem *>(item);
-        if (sgitem) {
-            pos = sgitem->mapToScene(_pos).toPoint();
-        } else
-#endif
-        {
-            QDeclarativeItem *ditem = qobject_cast<QDeclarativeItem *>(item);
-            if (!ditem) {
-                qWarning("Mouse event target is not an Item");
-                return;
-            }
-            pos = view->mapFromScene(ditem->mapToScene(_pos));
-            eventWidget = view->viewport();
+        QDeclarativeItem *ditem = qobject_cast<QDeclarativeItem *>(item);
+        if (!ditem) {
+            qWarning("Mouse event target is not an Item");
+            return;
         }
+        pos = view->mapFromScene(ditem->mapToScene(_pos));
+        eventWidget = view->viewport();
 
         QTEST_ASSERT(button == Qt::NoButton || button & Qt::MouseButtonMask);
         QTEST_ASSERT(stateKey == 0 || stateKey & Qt::KeyboardModifierMask);
@@ -250,11 +237,6 @@ bool QuickTestEvent::mouseMove
 
 QWidget *QuickTestEvent::eventWidget()
 {
-#ifdef QUICK_TEST_SCENEGRAPH
-    QSGItem *sgitem = qobject_cast<QSGItem *>(parent());
-    if (sgitem)
-        return sgitem->canvas();
-#endif
     QDeclarativeItem *item = qobject_cast<QDeclarativeItem *>(parent());
     if (!item)
         return 0;
